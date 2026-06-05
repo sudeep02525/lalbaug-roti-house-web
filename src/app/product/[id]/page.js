@@ -1,0 +1,439 @@
+"use client"
+import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { useCart } from "@/context/CartContext"
+import { useAuth } from "@/context/AuthContext"
+import { Leaf, ChevronLeft, ShoppingCart, CreditCard, Check, ShieldCheck, Clock, Award, Info, Flame, Droplets } from "lucide-react"
+import Link from "next/link"
+
+const FOOD_IMG = "/images/indian_roti_meal.png"
+
+const globalAddons = [
+  { id: 'a1', name: 'Puranpoli & Modak', price: 150, image: '/images/extra-puranpori&modak.png' },
+  { id: 'a2', name: 'Big Mineral Water', price: 20, image: null },
+  { id: 'a3', name: 'Small Mineral Water', price: 10, image: null },
+  { id: 'a4', name: 'Extra Pav', price: 5, image: '/images/extra-pav.png' },
+  { id: 'a5', name: 'Extra Chutney', price: 20, image: '/images/extra-chtney.png' },
+]
+
+export default function ProductDetailsPage() {
+  const { id } = useParams()
+  const router = useRouter()
+  const { addToCart } = useCart()
+  const { user } = useAuth()
+
+  const [product, setProduct] = useState(null)
+  const [loading, setLoading] = useState(true)
+  
+  // State for variant selection and quantity
+  const [selectedVariant, setSelectedVariant] = useState(null)
+  const [selectedAddons, setSelectedAddons] = useState([])
+  const [quantity, setQuantity] = useState(1)
+  const [addedToCart, setAddedToCart] = useState(false)
+  const [activeTab, setActiveTab] = useState('description')
+
+  const toggleAddon = (addon) => {
+    setSelectedAddons(prev =>
+      prev.some(a => a.id === addon.id)
+        ? prev.filter(a => a.id !== addon.id)
+        : [...prev, addon]
+    )
+  }
+
+  // Price Calculation
+  const addonsTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0)
+  const unitPrice = (selectedVariant?.price || 0) + addonsTotal
+  const totalPrice = unitPrice * quantity
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/catalog/products/${id}`)
+        const data = await res.json()
+        if (data.success && data.data) {
+          setProduct(data.data)
+          // Default to the first variant if available
+          if (data.data.variants && data.data.variants.length > 0) {
+            // Prefer single if exists, otherwise first
+            const single = data.data.variants.find(v => v.minQuantity === 1)
+            setSelectedVariant(single || data.data.variants[0])
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch product", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (id) {
+      fetchProduct()
+    }
+  }, [id])
+
+  const handleAddToCart = () => {
+    if (!product || !selectedVariant) return
+
+    const cartItem = {
+      id: product.id || product._id || id,
+      name: product.name + (selectedVariant.minQuantity > 1 ? ` (${selectedVariant.name})` : ""),
+      price: selectedVariant.price,
+      image: product.images?.[0] || FOOD_IMG,
+      category: product.categoryId?.name || ""
+    }
+
+    // Pass the variant object if it's a pack
+    const packVariant = selectedVariant.minQuantity > 1 ? {
+      id: 'pack',
+      name: selectedVariant.name,
+      price: selectedVariant.price
+    } : null
+
+    addToCart(cartItem, quantity, packVariant, selectedAddons)
+    
+    setAddedToCart(true)
+    setTimeout(() => setAddedToCart(false), 2000)
+  }
+
+  const handleProceedToPay = () => {
+    handleAddToCart()
+    if (!user) {
+      router.push('/signup?redirect=/checkout')
+    } else {
+      router.push('/checkout')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-32 bg-[#FAF8F5] flex flex-col items-center justify-center">
+        <div className="w-16 h-16 border-4 border-[#16A34A] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-[#114D3C] font-bold text-xl font-outfit">Loading premium details...</p>
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen pt-32 bg-[#FAF8F5] flex flex-col items-center justify-center text-center px-4">
+        <h1 className="text-4xl font-bold text-[#114D3C] mb-4" style={{ fontFamily: "var(--font-playfair)" }}>Product Not Found</h1>
+        <p className="text-[#2C3E35] opacity-70 mb-8" style={{ fontFamily: "var(--font-outfit)" }}>We couldn't find the product you're looking for.</p>
+        <Link href="/menu" className="bg-[#114D3C] text-white px-8 py-3 rounded-full font-bold hover:bg-[#0B382B] transition-colors">
+          Back to Menu
+        </Link>
+      </div>
+    )
+  }
+
+  const imageSrc = product.images?.[0] || FOOD_IMG
+  const catName = product.categoryId?.name || "Premium Item"
+
+  // Professional dummy details based on category
+  const nutritionFacts = {
+    cal: Math.floor(Math.random() * 300) + 150,
+    protein: Math.floor(Math.random() * 10) + 2,
+    carbs: Math.floor(Math.random() * 40) + 15,
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      <style jsx global>{`
+        footer {
+          display: none !important;
+        }
+      `}</style>
+      
+      {/* Mobile Header (Back button & Category) */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#EAE5D9] px-4 py-4 flex items-center justify-between">
+        <button 
+          onClick={() => router.back()} 
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-[#FAF8F5] text-[#114D3C] shadow-sm border border-[#EAE5D9]"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <div className="text-xs font-bold text-[#C19B6C] uppercase tracking-widest" style={{ fontFamily: "var(--font-outfit)" }}>
+          {catName}
+        </div>
+        <div className="w-10"></div> {/* Spacer for centering */}
+      </div>
+
+      <div className="flex flex-col lg:flex-row min-h-screen">
+        
+        {/* Left Side: Premium Image Area */}
+        <div className="lg:w-1/2 lg:fixed lg:top-0 lg:bottom-0 lg:left-0 bg-[#114D3C] relative overflow-hidden flex flex-col h-[50vh] lg:h-full">
+          
+          {/* Back button for Desktop */}
+          <button 
+            onClick={() => router.back()} 
+            className="hidden lg:flex absolute top-8 left-8 items-center gap-2 px-6 py-3 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-[#114D3C] transition-all shadow-md z-30 font-bold border border-white/30"
+            style={{ fontFamily: "var(--font-outfit)" }}
+          >
+            <ChevronLeft className="w-5 h-5" />
+            Back to Menu
+          </button>
+          
+          {/* Premium Food Image (Object Cover) */}
+          <div className="absolute inset-0 z-10">
+            <img 
+              src={imageSrc} 
+              alt={product.name} 
+              className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-1000 ease-out"
+            />
+            {/* Elegant Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+          </div>
+
+          {/* Image Overlay Content (Bottom Left) */}
+          <div className="relative z-20 mt-auto p-6 lg:p-12 pb-10">
+            <div className="inline-flex items-center gap-2 bg-[#16A34A] text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+              <Leaf className="w-3 h-3" />
+              100% Pure Veg
+            </div>
+            <h2 className="text-white text-3xl lg:text-5xl font-bold leading-tight mb-2 drop-shadow-md" style={{ fontFamily: "var(--font-playfair)" }}>
+              {product.name}
+            </h2>
+            <div className="flex items-center gap-6 text-white/90">
+              <span className="flex items-center gap-2 text-sm font-medium" style={{ fontFamily: "var(--font-outfit)" }}>
+                <Clock className="w-4 h-4 text-[#C19B6C]" /> Prep time: 10-15 mins
+              </span>
+              <span className="flex items-center gap-2 text-sm font-medium" style={{ fontFamily: "var(--font-outfit)" }}>
+                <Award className="w-4 h-4 text-[#C19B6C]" /> Premium Quality
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Professional Product Details */}
+        <div className="lg:w-1/2 lg:ml-[50%] bg-[#FAF8F5] px-6 py-8 lg:p-16 xl:p-20 pb-48 lg:pb-24">
+          <div className="max-w-2xl mx-auto lg:mx-0 bg-white rounded-3xl p-6 lg:p-10 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-[#EAE5D9]">
+            
+            {/* Tab Navigation */}
+            <div className="flex items-center gap-6 border-b border-[#EAE5D9] mb-8 pb-4">
+              <button 
+                onClick={() => setActiveTab('description')}
+                className={`text-sm font-bold uppercase tracking-widest transition-colors relative ${activeTab === 'description' ? 'text-[#114D3C]' : 'text-[#A09D96] hover:text-[#73706A]'}`}
+                style={{ fontFamily: "var(--font-outfit)" }}
+              >
+                Description
+                {activeTab === 'description' && <div className="absolute -bottom-4 left-0 right-0 h-0.5 bg-[#16A34A]" />}
+              </button>
+              <button 
+                onClick={() => setActiveTab('ingredients')}
+                className={`text-sm font-bold uppercase tracking-widest transition-colors relative ${activeTab === 'ingredients' ? 'text-[#114D3C]' : 'text-[#A09D96] hover:text-[#73706A]'}`}
+                style={{ fontFamily: "var(--font-outfit)" }}
+              >
+                Details
+                {activeTab === 'ingredients' && <div className="absolute -bottom-4 left-0 right-0 h-0.5 bg-[#16A34A]" />}
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="mb-10 min-h-[120px]">
+              {activeTab === 'description' && (
+                <div className="animate-fade-in">
+                  <p className="text-[#4A5568] text-lg leading-relaxed" style={{ fontFamily: "var(--font-outfit)" }}>
+                    {product.description || "A delicious and wholesome meal prepared with fresh ingredients and authentic spices. Perfect for your daily cravings."}
+                  </p>
+                  
+                  {/* Nutritional Info Badges */}
+                  <div className="flex flex-wrap gap-4 mt-8">
+                    <div className="flex items-center gap-3 bg-[#FAF8F5] px-4 py-3 rounded-2xl border border-[#EAE5D9]">
+                      <div className="w-8 h-8 rounded-full bg-[#16A34A]/10 flex items-center justify-center">
+                        <Flame className="w-4 h-4 text-[#16A34A]" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-[#73706A]">Calories</p>
+                        <p className="text-sm font-bold text-[#114D3C]">{nutritionFacts.cal} kcal</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 bg-[#FAF8F5] px-4 py-3 rounded-2xl border border-[#EAE5D9]">
+                      <div className="w-8 h-8 rounded-full bg-[#C19B6C]/10 flex items-center justify-center">
+                        <Droplets className="w-4 h-4 text-[#C19B6C]" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-[#73706A]">Protein</p>
+                        <p className="text-sm font-bold text-[#114D3C]">{nutritionFacts.protein}g</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeTab === 'ingredients' && (
+                <div className="animate-fade-in text-[#4A5568]" style={{ fontFamily: "var(--font-outfit)" }}>
+                  <h4 className="font-bold text-[#114D3C] mb-3">Chef's Note</h4>
+                  <p className="text-md leading-relaxed mb-6">
+                    Our {product.name.toLowerCase()} is prepared daily in small batches to ensure maximum freshness. We source our grains, vegetables, and spices directly from premium local markets, ensuring an authentic Maharashtrian taste that reminds you of home.
+                  </p>
+                  <h4 className="font-bold text-[#114D3C] mb-3">Allergen Information</h4>
+                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                    <li>Prepared in a 100% vegetarian kitchen.</li>
+                    <li>May contain traces of gluten or dairy depending on the item.</li>
+                    <li>No artificial colors or preservatives added.</li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Variants */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="mb-10">
+                <h3 className="text-sm uppercase tracking-widest text-[#73706A] font-bold mb-4" style={{ fontFamily: "var(--font-outfit)" }}>
+                  Select Quantity Option
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {product.variants.map(variant => (
+                    <button
+                      key={variant._id}
+                      onClick={() => setSelectedVariant(variant)}
+                      className={`relative overflow-hidden p-5 rounded-2xl border-2 text-left transition-all duration-300 group ${
+                        selectedVariant?._id === variant._id
+                          ? 'border-[#16A34A] bg-[#16A34A]/5 shadow-[0_8px_30px_rgba(22,163,74,0.12)]'
+                          : 'border-[#EAE5D9] bg-white hover:border-[#16A34A]/30 hover:shadow-md'
+                      }`}
+                      style={{ fontFamily: "var(--font-outfit)" }}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <span className={`font-bold text-lg ${selectedVariant?._id === variant._id ? 'text-[#114D3C]' : 'text-[#2C3E35]'}`}>
+                          {variant.name}
+                        </span>
+                        {selectedVariant?._id === variant._id && (
+                          <div className="w-6 h-6 rounded-full bg-[#16A34A] flex items-center justify-center shadow-sm">
+                            <Check className="w-3.5 h-3.5 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-2xl font-bold text-[#16A34A]">₹{variant.price}</span>
+                      
+                      {variant.minQuantity > 1 && (
+                        <div className="mt-2 inline-flex text-xs font-bold bg-white border border-[#EAE5D9] text-[#73706A] px-2 py-1 rounded-md">
+                          Pack of {variant.minQuantity}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add-ons */}
+            <div className="mb-10">
+              <h3 className="text-sm uppercase tracking-widest text-[#73706A] font-bold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-outfit)" }}>
+                <Info className="w-4 h-4" /> Enhance Your Meal (Optional)
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {globalAddons.map(addon => {
+                  const isSelected = selectedAddons.some(a => a.id === addon.id)
+                  return (
+                    <label key={addon.id} className={`flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${isSelected ? 'border-[#114D3C] bg-[#114D3C]/5' : 'border-[#EAE5D9] bg-[#FAF8F5] hover:border-[#114D3C]/30'}`}>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors shrink-0 ${isSelected ? 'bg-[#114D3C] border-[#114D3C]' : 'border-[#C19B6C] bg-white'}`}>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                      </div>
+                      {addon.image && <img src={addon.image} alt={addon.name} className="w-10 h-10 rounded-xl object-cover border border-[#EAE5D9]" />}
+                      <div className="flex flex-col flex-1">
+                        <span className={`text-sm font-bold ${isSelected ? 'text-[#114D3C]' : 'text-[#2C3E35]'}`} style={{ fontFamily: "var(--font-outfit)" }}>{addon.name}</span>
+                        <span className="text-[#16A34A] font-bold text-xs">+₹{addon.price}</span>
+                      </div>
+                      <input type="checkbox" className="hidden" checked={isSelected} onChange={() => toggleAddon(addon)} />
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Desktop Action Area */}
+            <div className="hidden lg:block bg-[#FDFBF7] p-6 rounded-3xl text-[#114D3C] shadow-sm border border-[#E8E1D5]">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <span className="text-[#73706A] font-bold text-sm tracking-widest uppercase" style={{ fontFamily: "var(--font-outfit)" }}>Quantity</span>
+                  <div className="flex items-center gap-4 bg-white p-1 rounded-full border border-[#E8E1D5] shadow-sm">
+                    <button 
+                      onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                      className="w-10 h-10 flex items-center justify-center rounded-full text-[#114D3C] hover:bg-[#FAF8F5] transition-colors text-xl font-medium"
+                    >-</button>
+                    <span className="w-6 text-center font-bold text-xl">{quantity}</span>
+                    <button 
+                      onClick={() => setQuantity(q => q + 1)}
+                      className="w-10 h-10 flex items-center justify-center rounded-full text-[#114D3C] hover:bg-[#FAF8F5] transition-colors text-xl font-medium"
+                    >+</button>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-[#73706A] font-bold mb-1 tracking-widest uppercase" style={{ fontFamily: "var(--font-outfit)" }}>Total Price</p>
+                  <p className="text-4xl font-bold text-[#16A34A]">₹{totalPrice}</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <button
+                  onClick={handleAddToCart}
+                  className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-lg transition-all duration-300 border-2 ${
+                    addedToCart 
+                      ? 'bg-[#16A34A] border-[#16A34A] text-white shadow-[0_8px_20px_rgba(22,163,74,0.3)]'
+                      : 'bg-white border-[#114D3C] text-[#114D3C] hover:bg-[#FAF8F5] shadow-sm'
+                  }`}
+                  style={{ fontFamily: "var(--font-outfit)" }}
+                >
+                  {addedToCart ? (
+                    <><Check className="w-5 h-5" /> Added to Cart</>
+                  ) : (
+                    <><ShoppingCart className="w-5 h-5" /> Add to Cart</>
+                  )}
+                </button>
+                <button
+                  onClick={handleProceedToPay}
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#C19B6C] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#A9845B] transition-all shadow-[0_8px_25px_rgba(193,155,108,0.35)]"
+                  style={{ fontFamily: "var(--font-outfit)" }}
+                >
+                  <CreditCard className="w-5 h-5" />
+                  Proceed to Pay
+                </button>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Sticky Action Bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#EAE5D9] p-4 pb-6 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4 bg-[#FAF8F5] border border-[#EAE5D9] p-1 rounded-full">
+            <button 
+              onClick={() => setQuantity(q => Math.max(1, q - 1))}
+              className="w-10 h-10 flex items-center justify-center rounded-full text-[#114D3C] hover:bg-white transition-colors text-xl font-medium"
+            >-</button>
+            <span className="w-6 text-center font-bold text-[#114D3C]">{quantity}</span>
+            <button 
+              onClick={() => setQuantity(q => q + 1)}
+              className="w-10 h-10 flex items-center justify-center rounded-full text-[#114D3C] hover:bg-white transition-colors text-xl font-medium"
+            >+</button>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-[#73706A] font-bold tracking-widest uppercase mb-1">Total</p>
+            <p className="text-2xl font-bold text-[#16A34A]">₹{totalPrice}</p>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={handleAddToCart}
+            className={`w-[4.5rem] flex-shrink-0 flex items-center justify-center rounded-2xl border-2 transition-all ${
+              addedToCart
+                ? 'bg-[#16A34A] border-[#16A34A] text-white'
+                : 'bg-white border-[#114D3C] text-[#114D3C]'
+            }`}
+          >
+            {addedToCart ? <Check className="w-6 h-6" /> : <ShoppingCart className="w-6 h-6" />}
+          </button>
+          <button
+            onClick={handleProceedToPay}
+            className="flex-1 flex items-center justify-center gap-2 bg-[#114D3C] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#0B382B] transition-all shadow-[0_8px_20px_rgba(17,77,60,0.3)]"
+            style={{ fontFamily: "var(--font-outfit)" }}
+          >
+            Proceed to Pay
+          </button>
+        </div>
+      </div>
+
+    </div>
+  )
+}
