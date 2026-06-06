@@ -91,8 +91,8 @@ export default function ContactPage() {
                     <h4 className="font-bold text-sm text-[#73706A] uppercase tracking-widest mb-2 font-outfit">Visit Us</h4>
                     <p className="font-medium text-[#1A4D2E] leading-relaxed text-lg font-outfit">
                       Lalbaug Roti House<br />
-                      Shop No. 1, Near Kalachowki,<br />
-                      Lalbaug, Mumbai - 400012
+                      Shop No 17/45, HY, Ganesh Nagar,<br />
+                      Lal Baug, Mumbai - 400012
                     </p>
                   </div>
                 </motion.div>
@@ -127,7 +127,7 @@ export default function ContactPage() {
                   <div>
                     <h4 className="font-bold text-sm text-[#73706A] uppercase tracking-widest mb-2 font-outfit">Timings</h4>
                     <p className="font-medium text-[#1A4D2E] text-lg font-outfit">
-                      7:00 AM - 11:00 PM<br />
+                      10:00 AM - 10:00 PM<br />
                       Monday to Sunday
                     </p>
                   </div>

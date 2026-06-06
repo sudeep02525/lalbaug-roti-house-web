@@ -108,15 +108,15 @@ export function Footer() {
                 <div className="w-8 h-8 rounded-full bg-[#C19B6C]/10 flex items-center justify-center shrink-0 group-hover:bg-[#C19B6C] transition-colors duration-300">
                   <MapPin className="w-4 h-4 text-[#C19B6C] group-hover:text-white transition-colors duration-300" />
                 </div>
-                <span className="leading-relaxed text-white/70 group-hover:text-white transition-colors">Shop No. 1, Near Kalachowki,<br />Lalbaug, Mumbai – 400012</span>
+                <span className="leading-relaxed text-white/70 group-hover:text-white transition-colors">Shop No 17/45, HY, Ganesh Nagar,<br />Lal Baug, Mumbai - 400012</span>
               </li>
               <li className="flex gap-4 items-start group">
                 <div className="w-8 h-8 rounded-full bg-[#C19B6C]/10 flex items-center justify-center shrink-0 group-hover:bg-[#C19B6C] transition-colors duration-300">
                   <Phone className="w-4 h-4 text-[#C19B6C] group-hover:text-white transition-colors duration-300" />
                 </div>
                 <span className="leading-relaxed text-white/70 group-hover:text-white transition-colors">
-                  +91 93246 88099<br />
-                  <span className="text-[#C19B6C] text-xs font-medium">Mon-Sun, 7:00 AM - 11:00 PM</span>
+                  +91 93246 88099 / +91 99206 88099<br />
+                  <span className="text-[#C19B6C] text-xs font-medium">Mon-Sun, 10:00 AM - 10:00 PM</span>
                 </span>
               </li>
               <li className="flex gap-4 items-start group">
