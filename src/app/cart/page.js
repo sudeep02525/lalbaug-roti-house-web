@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/context/AuthContext'
+import { getImageUrl } from '@/components/ProductCard'
 import { Trash2, ArrowRight, ShoppingBag, Plus, Minus, ChevronLeft, ShieldCheck } from 'lucide-react'
 
 export default function CartPage() {
@@ -107,7 +108,7 @@ export default function CartPage() {
                     {/* Image */}
                     <div className="w-full sm:w-28 h-40 sm:h-28 rounded-2xl overflow-hidden bg-[#FAF8F5] shrink-0 relative">
                       <img
-                        src={item.product.image}
+                        src={getImageUrl(item.product.image)}
                         alt={item.product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />

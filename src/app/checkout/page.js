@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/context/AuthContext'
 import { MapPicker } from '@/components/MapPicker'
+import { getImageUrl } from '@/components/ProductCard'
 import { CheckCircle2, AlertCircle, CreditCard, MapPin, Loader2, ChevronLeft, ShieldCheck, ArrowRight, Receipt, Map, Plus } from 'lucide-react'
 
 const KITCHEN_LAT = 18.9910
@@ -511,7 +512,7 @@ export default function CheckoutPage() {
                     return (
                       <div key={item.cartItemId} className={`flex gap-6 pb-8 ${index !== items.length - 1 ? 'border-b border-[#E8E1D5]' : ''}`}>
                         <div className="w-24 h-24 sm:w-36 sm:h-36 rounded-[1.5rem] overflow-hidden border border-[#E8E1D5] bg-[#FAF5E9] shrink-0 relative group">
-                          <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                          <img src={getImageUrl(item.product.image)} alt={item.product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                         </div>
                         <div className="flex-1 flex flex-col justify-center">
                           <h4 className="font-bold text-[#1A4D2E] text-xl sm:text-3xl leading-tight mb-2 font-playfair">{item.product.name}</h4>

@@ -3,18 +3,12 @@ import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useCart } from "@/context/CartContext"
 import { useAuth } from "@/context/AuthContext"
-import { Leaf, ChevronLeft, ShoppingCart, CreditCard, Check, ShieldCheck, Clock, Award, Info, Flame, Droplets } from "lucide-react"
+import { Leaf, ChevronLeft, ShoppingCart, CreditCard, Check, ShieldCheck, Clock, Award, Info, Flame, Droplets, Plus } from "lucide-react"
 import Link from "next/link"
 
-const FOOD_IMG = "/images/indian_roti_meal.png"
+import { getImageUrl } from '@/components/ProductCard'
 
-const globalAddons = [
-  { id: 'a1', name: 'Puranpoli & Modak', price: 150, image: '/images/extra-puranpori&modak.png' },
-  { id: 'a2', name: 'Big Mineral Water', price: 20, image: null },
-  { id: 'a3', name: 'Small Mineral Water', price: 10, image: null },
-  { id: 'a4', name: 'Extra Pav', price: 5, image: '/images/extra-pav.png' },
-  { id: 'a5', name: 'Extra Chutney', price: 20, image: '/images/extra-chtney.png' },
-]
+const FOOD_IMG = "/images/indian_roti_meal.png"
 
 export default function ProductDetailsPage() {
   const { id } = useParams()
@@ -34,8 +28,8 @@ export default function ProductDetailsPage() {
 
   const toggleAddon = (addon) => {
     setSelectedAddons(prev =>
-      prev.some(a => a.id === addon.id)
-        ? prev.filter(a => a.id !== addon.id)
+      prev.some(a => a._id === addon._id)
+        ? prev.filter(a => a._id !== addon._id)
         : [...prev, addon]
     )
   }
@@ -175,7 +169,7 @@ export default function ProductDetailsPage() {
           {/* Premium Food Image (Object Cover) */}
           <div className="absolute inset-0 z-10">
             <img 
-              src={imageSrc} 
+              src={getImageUrl(imageSrc)} 
               alt={product.name} 
               className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-1000 ease-out"
             />
@@ -315,30 +309,33 @@ export default function ProductDetailsPage() {
               </div>
             )}
 
-            {/* Add-ons */}
-            <div className="mb-10">
-              <h3 className="text-sm uppercase tracking-widest text-[#73706A] font-bold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-outfit)" }}>
-                <Info className="w-4 h-4" /> Enhance Your Meal (Optional)
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {globalAddons.map(addon => {
-                  const isSelected = selectedAddons.some(a => a.id === addon.id)
-                  return (
-                    <label key={addon.id} className={`flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${isSelected ? 'border-[#114D3C] bg-[#114D3C]/5' : 'border-[#EAE5D9] bg-[#FAF8F5] hover:border-[#114D3C]/30'}`}>
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors shrink-0 ${isSelected ? 'bg-[#114D3C] border-[#114D3C]' : 'border-[#C19B6C] bg-white'}`}>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
-                      </div>
-                      {addon.image && <img src={addon.image} alt={addon.name} className="w-10 h-10 rounded-xl object-cover border border-[#EAE5D9]" />}
-                      <div className="flex flex-col flex-1">
-                        <span className={`text-sm font-bold ${isSelected ? 'text-[#114D3C]' : 'text-[#2C3E35]'}`} style={{ fontFamily: "var(--font-outfit)" }}>{addon.name}</span>
-                        <span className="text-[#16A34A] font-bold text-xs">+₹{addon.price}</span>
-                      </div>
-                      <input type="checkbox" className="hidden" checked={isSelected} onChange={() => toggleAddon(addon)} />
-                    </label>
-                  )
-                })}
+            {/* Add-ons Section */}
+            {(product.addons && product.addons.length > 0) && (
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-[#14452F] mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-outfit)" }}>
+                  <Plus className="w-5 h-5 text-[#E8A359]" /> Add Extras
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {product.addons.map(addon => {
+                    const isSelected = selectedAddons.some(a => a._id === addon._id)
+                    return (
+                      <label 
+                        key={addon._id} 
+                        className={`flex items-center gap-4 p-3 rounded-2xl border-2 cursor-pointer transition-all ${isSelected ? 'border-[#14452F] bg-[#14452F]/5' : 'border-[#EAE5D9] bg-white hover:border-[#14452F]/30 hover:bg-[#FAF8F5]'}`}
+                      >
+                        <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors shrink-0 ${isSelected ? 'bg-[#14452F] border-[#14452F]' : 'border-2 border-[#C19B6C] bg-white'}`}>
+                          {isSelected && <div className="w-2.5 h-2.5 bg-white rounded-sm" />}
+                        </div>
+                        {addon.image && <img src={getImageUrl(addon.image)} alt={addon.name} className="w-10 h-10 rounded-xl object-cover border border-[#EAE5D9]" />}
+                        <span className="text-[#2C3E35] flex-1 font-medium" style={{ fontFamily: "var(--font-outfit)" }}>{addon.name}</span>
+                        <span className="text-[#E8A359] font-bold">+₹{addon.price}</span>
+                        <input type="checkbox" className="hidden" checked={isSelected} onChange={() => toggleAddon(addon)} />
+                      </label>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Desktop Action Area */}
             <div className="hidden lg:block bg-[#FDFBF7] p-6 rounded-3xl text-[#114D3C] shadow-sm border border-[#E8E1D5]">
