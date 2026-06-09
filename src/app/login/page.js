@@ -159,7 +159,7 @@ function LoginContent() {
             100% Pure Veg
           </div>
           <h2 className="text-4xl lg:text-5xl font-bold text-white leading-tight mb-6" style={{ fontFamily: "var(--font-playfair)" }}>
-            Your favorite homely meals, just a click away.
+            Your favorite fresh meals, just a click away.
           </h2>
           <p className="text-white/80 text-lg leading-relaxed mb-8" style={{ fontFamily: "var(--font-outfit)" }}>
             Log in to quickly re-order your favorites, track your current deliveries, and experience lightning-fast checkout.

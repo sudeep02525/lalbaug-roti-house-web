@@ -64,6 +64,7 @@ function MenuCategorySection({ category, items }) {
 function MenuContent() {
   const searchParams = useSearchParams()
   const initialCat = searchParams.get('cat') || 'All'
+  const { storeStatus } = useCart()
   const [menuData, setMenuData] = useState({})
   const [loading, setLoading] = useState(true)
   const categories = ['All', ...Object.keys(menuData)]
@@ -145,7 +146,7 @@ function MenuContent() {
       </div>
       
       {/* Category filter pills — horizontally scrollable & STICKY */}
-      <div className="sticky top-[80px] z-40 bg-white/95 backdrop-blur-md shadow-sm border-b border-[#EAE5D9] py-4 transition-all">
+      <div className={`sticky z-40 bg-white/95 backdrop-blur-md shadow-sm border-b border-[#EAE5D9] py-4 transition-all ${!storeStatus?.isOpen && storeStatus?.message ? 'top-[120px]' : 'top-[80px]'}`}>
         <div className="container max-w-7xl">
           <div
             className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 hide-scrollbar"

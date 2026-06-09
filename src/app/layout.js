@@ -29,7 +29,7 @@ const greatVibes = Great_Vibes({
 
 export const metadata = {
   title: "Lalbaug Roti House",
-  description: "Fresh Handmade Roti, Bhakari, Thepla & Homely Food Delivered Daily.",
+  description: "Fresh Handmade Roti, Bhakari, Thepla & Delicious Food Delivered Daily.",
 };
 
 export default function RootLayout({ children }) {

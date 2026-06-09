@@ -1,20 +1,33 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, Menu, X, ShoppingBag, User, LogOut } from "lucide-react";
+import { ShoppingCart, Menu, X, ShoppingBag, User, LogOut, AlertCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
 export function Navbar() {
   const pathname = usePathname();
-  const { totalItems } = useCart();
+  const { totalItems, storeStatus } = useCart();
   const { user, logout } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  // Apply global padding to body when the banner is visible to prevent overlap
+  useEffect(() => {
+    const hiddenNavPages = ['/cart', '/checkout', '/order-success'];
+    const isNavHidden = hiddenNavPages.some(p => pathname?.startsWith(p)) || pathname?.startsWith('/product');
+    
+    if (mounted && storeStatus && !storeStatus.isOpen && !isNavHidden) {
+      document.body.style.paddingTop = '40px';
+    } else {
+      document.body.style.paddingTop = '0px';
+    }
+    return () => { document.body.style.paddingTop = '0px'; };
+  }, [mounted, storeStatus, pathname]);
 
   useEffect(() => {
     setMounted(true);
@@ -57,6 +70,13 @@ export function Navbar() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 bg-white shadow-[0_4px_20px_rgb(0,0,0,0.08)] ${scrolled ? "" : "lg:bg-transparent lg:shadow-none"} ${pathname === '/profile' ? 'lg:hidden' : ''}`}
     >
+      {/* Global Store Closed Banner */}
+      {mounted && storeStatus && !storeStatus.isOpen && (
+        <div className="w-full bg-[#E53E3E] text-white text-center py-2.5 px-4 text-xs md:text-sm font-bold shadow-sm z-50 flex items-center justify-center gap-2 tracking-wide" style={{ fontFamily: "var(--font-outfit)" }}>
+          <AlertCircle className="w-4 h-4" />
+          <span>{storeStatus.message}</span>
+        </div>
+      )}
       <div
         className={`container transition-all duration-300 py-0 ${scrolled ? "" : "lg:py-6"}`}
       >

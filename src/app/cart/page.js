@@ -4,11 +4,11 @@ import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/context/AuthContext'
 import { getImageUrl } from '@/components/ProductCard'
-import { Trash2, ArrowRight, ShoppingBag, Plus, Minus, ChevronLeft, ShieldCheck } from 'lucide-react'
+import { Trash2, ArrowRight, ShoppingBag, Plus, Minus, ChevronLeft, ShieldCheck, AlertCircle } from 'lucide-react'
 
 export default function CartPage() {
   const router = useRouter()
-  const { items, updateQuantity, removeFromCart, subtotal, calculateItemTotal, mounted } = useCart()
+  const { items, updateQuantity, removeFromCart, subtotal, calculateItemTotal, mounted, storeStatus } = useCart()
   const { user } = useAuth()
 
   if (!mounted) return null
@@ -66,8 +66,16 @@ export default function CartPage() {
         header, footer { display: none !important; }
       `}</style>
       
+      {/* Store Closed Global Banner */}
+      {!storeStatus?.isOpen && storeStatus?.message && (
+        <div className="w-full bg-[#E53E3E] text-white text-center py-2.5 px-4 text-xs md:text-sm font-bold shadow-sm flex items-center justify-center gap-2 tracking-wide sticky top-0 z-50" style={{ fontFamily: "var(--font-outfit)" }}>
+          <AlertCircle className="w-4 h-4" />
+          <span>{storeStatus.message}</span>
+        </div>
+      )}
+      
       {/* Header */}
-      <div className="bg-white border-b border-[#EAE5D9] sticky top-0 z-40 shadow-sm">
+      <div className={`bg-white border-b border-[#EAE5D9] sticky z-40 shadow-sm ${!storeStatus?.isOpen ? 'top-[40px]' : 'top-0'}`}>
           <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center justify-between gap-2">
             <Link href="/menu" className="flex items-center gap-1 sm:gap-2 text-[#73706A] hover:text-[#114D3C] transition-colors font-bold text-sm shrink-0" style={{ fontFamily: "var(--font-outfit)" }}>
               <ChevronLeft className="w-5 h-5 shrink-0" /> 
@@ -89,6 +97,13 @@ export default function CartPage() {
           <h1 className="text-4xl lg:text-5xl font-bold text-[#8B5E3C] mb-2" style={{ fontFamily: "var(--font-playfair)" }}>Review Order</h1>
           <p className="text-lg text-[#73706A]" style={{ fontFamily: "var(--font-outfit)" }}>You have {totalQuantity} items ready for checkout.</p>
         </div>
+
+        {!storeStatus?.isOpen && storeStatus?.message && (
+          <div className="mb-8 bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl flex items-center gap-3 shadow-sm">
+            <AlertCircle className="w-6 h-6 text-red-500 shrink-0" />
+            <p className="font-bold font-outfit">{storeStatus.message}</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
@@ -136,25 +151,25 @@ export default function CartPage() {
                         </div>
                         <div className="flex flex-col items-end shrink-0">
                           {originalTotal > itemTotal && (
-                            <span className="text-[13px] text-[#73706A] line-through opacity-70 mb-0.5">₹{originalTotal}</span>
+                            <span className="text-sm text-[#E8A359] line-through mb-1 font-medium" style={{ fontFamily: "var(--font-outfit)" }}>₹{originalTotal}</span>
                           )}
-                          <span className="font-bold text-[#114D3C] text-xl">₹{itemTotal}</span>
+                          <span className="font-bold text-[#114D3C] text-2xl tracking-tight" style={{ fontFamily: "var(--font-outfit)" }}>₹{itemTotal}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between mt-auto">
                         {/* Quantity Controls */}
-                        <div className="flex items-center bg-[#FAF8F5] border border-[#EAE5D9] rounded-full p-1">
+                        <div className="flex items-center bg-white border border-[#EAE5D9] rounded-full p-1 shadow-sm">
                           <button
                             onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
-                            className="w-8 h-8 flex items-center justify-center rounded-full text-[#114D3C] hover:bg-white hover:shadow-sm transition-all"
+                            className="w-8 h-8 flex items-center justify-center rounded-full text-[#114D3C] hover:bg-[#FAF8F5] transition-all"
                           >
                             <Minus className="w-4 h-4" />
                           </button>
-                          <span className="w-8 text-center text-sm font-bold text-[#114D3C]">{item.quantity}</span>
+                          <span className="w-8 text-center text-base font-bold text-[#114D3C]" style={{ fontFamily: "var(--font-outfit)" }}>{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
-                            className="w-8 h-8 flex items-center justify-center rounded-full text-[#114D3C] hover:bg-white hover:shadow-sm transition-all"
+                            className="w-8 h-8 flex items-center justify-center rounded-full text-[#114D3C] hover:bg-[#FAF8F5] transition-all"
                           >
                             <Plus className="w-4 h-4" />
                           </button>
@@ -190,15 +205,40 @@ export default function CartPage() {
                 <ShieldCheck className="w-6 h-6 text-[#8B5E3C]" /> Order Summary
               </h2>
 
-              <div className="space-y-4 mb-6 font-outfit">
-                <div className="flex justify-between text-[#73706A] text-lg font-medium">
-                  <span>Subtotal ({totalQuantity} items)</span>
-                  <span className="font-bold text-[#114D3C]">₹{subtotal}</span>
-                </div>
-                <div className="flex justify-between text-[#73706A] text-lg font-medium">
-                  <span>Delivery fee</span>
-                  <span className="text-[#8B5E3C] font-bold text-sm tracking-widest uppercase flex items-center">Calculated at checkout</span>
-                </div>
+              <div className="space-y-4 mb-6" style={{ fontFamily: "var(--font-outfit)" }}>
+                {(() => {
+                  const originalSubtotal = items.reduce((sum, item) => {
+                    const basePrice = item.variant ? item.variant.price : item.product.price;
+                    const addonsPrice = (item.addons || []).reduce((addSum, add) => addSum + add.price, 0);
+                    return sum + ((basePrice + addonsPrice) * item.quantity);
+                  }, 0);
+                  const totalDiscount = originalSubtotal - subtotal;
+                  
+                  return (
+                    <>
+                      <div className="flex justify-between text-[#73706A] pb-4">
+                        <span className="text-lg font-medium">Item Total</span>
+                        <span className="font-bold text-[#114D3C] text-lg">₹{originalSubtotal}</span>
+                      </div>
+                      {totalDiscount > 0 && (
+                        <div className="flex justify-between items-center text-[#16A34A] pb-4">
+                          <span className="text-sm font-bold bg-[#16A34A]/10 px-2 py-1 rounded-md border border-[#16A34A]/20 uppercase tracking-widest">Discount Applied</span>
+                          <span className="font-bold text-lg">- ₹{totalDiscount}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-[#73706A] pb-4 border-b border-[#E8E1D5]/50">
+                        <span className="text-lg font-medium">Delivery fee</span>
+                        <span className="text-[#8B5E3C] font-bold text-sm tracking-widest uppercase flex items-center">Calculated at checkout</span>
+                      </div>
+                      <div className="flex justify-between items-end pt-4 mb-2">
+                        <div className="flex flex-col">
+                          <span className="font-bold uppercase tracking-widest text-xs text-[#8B5E3C] mb-1">Subtotal</span>
+                          <span className="font-bold text-5xl text-[#16A34A] tracking-tight">₹{subtotal}</span>
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
 
               <div className="border-t border-[#E8E1D5] mt-6 pt-6 flex justify-between items-center mb-8">
@@ -206,18 +246,27 @@ export default function CartPage() {
                 <span className="font-bold text-4xl text-[#16A34A]">₹{subtotal}</span>
               </div>
 
-              <Link href={user ? "/checkout" : "/signup?redirect=/checkout"}>
+              {!storeStatus?.isOpen ? (
                 <button
-                  className="w-full flex items-center justify-center gap-3 bg-[#C19B6C] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#A9845B] transition-all shadow-[0_8px_25px_rgba(193,155,108,0.35)] hover:-translate-y-0.5"
+                  disabled
+                  className="w-full flex items-center justify-center gap-3 bg-gray-400 text-white py-5 rounded-2xl font-bold text-xl cursor-not-allowed"
                   style={{ fontFamily: "var(--font-outfit)" }}
                 >
-                  Proceed to Checkout
-                  <ArrowRight className="w-5 h-5" />
+                  Store Closed
                 </button>
-              </Link>
+              ) : (
+                <Link href={user ? "/checkout" : "/signup?redirect=/checkout"}>
+                  <button
+                    className="w-full flex items-center justify-center gap-3 bg-[#1A4D2E] text-white py-5 rounded-2xl font-bold text-xl hover:bg-[#0B382B] transition-all duration-300 shadow-[0_8px_25px_rgba(26,77,46,0.35)] hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(26,77,46,0.45)]"
+                    style={{ fontFamily: "var(--font-outfit)" }}
+                  >
+                    Proceed to Checkout
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
-
         </div>
       </div>
     </div>

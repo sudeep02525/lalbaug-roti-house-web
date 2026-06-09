@@ -29,7 +29,7 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSubmitting(true)
     
-    const waText = `*New Query / Help Request*\n\n*Name:* ${formData.name}\n*Email:* ${formData.email}\n*Subject:* ${formData.subject}\n*Message:* ${formData.message}`
+    const waText = `Hello *Lalbaug Roti House* Team! \\u{1F44B}\n\nI have a new query from your website contact form:\n\n\\u{1F464} *Customer Details:*\n• *Name:* ${formData.name}\n• *Email:* ${formData.email}\n\n\\u{1F4DD} *Query Information:*\n• *Subject:* ${formData.subject}\n• *Message:*\n"${formData.message}"\n\nPlease reply to me as soon as possible. Thank you! \\u{1F64F}`;
     const encodedText = encodeURIComponent(waText)
     window.open(`https://wa.me/919920688099?text=${encodedText}`, '_blank')
     
@@ -165,7 +165,7 @@ export default function ContactPage() {
                           className="peer w-full bg-white border-b-2 border-[#E8E1D5] rounded-t-xl px-5 pt-7 pb-3 text-[#1A4D2E] font-medium focus:outline-none focus:border-[#8B5E3C] focus:bg-[#FAF5E9] transition-all shadow-sm"
                           placeholder=" "
                         />
-                        <label className="absolute text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C] font-outfit">Your Name</label>
+                        <label className="absolute pointer-events-none text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C] font-outfit">Your Name</label>
                       </div>
                       <div className="relative group mt-2">
                         <input 
@@ -177,7 +177,7 @@ export default function ContactPage() {
                           className="peer w-full bg-white border-b-2 border-[#E8E1D5] rounded-t-xl px-5 pt-7 pb-3 text-[#1A4D2E] font-medium focus:outline-none focus:border-[#8B5E3C] focus:bg-[#FAF5E9] transition-all shadow-sm"
                           placeholder=" "
                         />
-                        <label className="absolute text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C] font-outfit">Email Address</label>
+                        <label className="absolute pointer-events-none text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C] font-outfit">Email Address</label>
                       </div>
                     </div>
                     <div className="relative group mt-2">
@@ -189,7 +189,7 @@ export default function ContactPage() {
                         className="peer w-full bg-white border-b-2 border-[#E8E1D5] rounded-t-xl px-5 pt-7 pb-3 text-[#1A4D2E] font-medium focus:outline-none focus:border-[#8B5E3C] focus:bg-[#FAF5E9] transition-all shadow-sm"
                         placeholder=" "
                       />
-                      <label className="absolute text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C] font-outfit">Subject</label>
+                      <label className="absolute pointer-events-none text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C] font-outfit">Subject</label>
                     </div>
                     <div className="relative group mt-2">
                       <textarea 
@@ -200,7 +200,7 @@ export default function ContactPage() {
                         placeholder=" "
                         required
                       ></textarea>
-                      <label className="absolute text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C] font-outfit">Message</label>
+                      <label className="absolute pointer-events-none text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C] font-outfit">Message</label>
                     </div>
                     
                     <button 

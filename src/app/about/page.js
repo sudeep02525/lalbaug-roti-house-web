@@ -42,7 +42,7 @@ export default function AboutPage() {
           
           <p className="text-xl text-[#73706A] leading-relaxed max-w-3xl mx-auto" style={{ fontFamily: "var(--font-outfit)" }}>
             At Lalbaug Roti House, we believe that nothing beats the taste of a warm, handmade roti. 
-            Born out of a passion for authentic Maharashtrian homely food, our journey started with a simple goal: 
+            Born out of a passion for authentic traditional food, our journey started with a simple goal: 
             to bring the comfort of home-cooked meals to every dining table in Mumbai.
           </p>
         </motion.div>
@@ -141,7 +141,7 @@ export default function AboutPage() {
                 </div>
                 <div>
                   <h4 className="font-bold text-2xl mb-3" style={{ fontFamily: "var(--font-playfair)" }}>Traditional Recipes</h4>
-                  <p className="text-[#73706A] text-lg leading-relaxed" style={{ fontFamily: "var(--font-outfit)" }}>We preserve the authentic Maharashtrian cooking methods, keeping the nostalgic "homemade" taste alive in every bite.</p>
+                  <p className="text-[#73706A] text-lg leading-relaxed" style={{ fontFamily: "var(--font-outfit)" }}>We preserve authentic traditional cooking methods, keeping the nostalgic taste alive in every bite.</p>
                 </div>
               </div>
 

@@ -127,7 +127,7 @@ function SignupContent() {
             <Leaf className="w-3 h-3" />
             100% Pure Veg
           </div>
-          <h2 className="text-4xl lg:text-5xl font-bold text-white leading-tight mb-6" style={{ fontFamily: "var(--font-playfair)" }}>Homely meals delivered to your door.</h2>
+          <h2 className="text-4xl lg:text-5xl font-bold text-white leading-tight mb-6" style={{ fontFamily: "var(--font-playfair)" }}>Fresh meals delivered to your door.</h2>
           <p className="text-white/80 text-lg leading-relaxed mb-8" style={{ fontFamily: "var(--font-outfit)" }}>
             Sign up to save your addresses, track past orders, and checkout in seconds. Fresh, handmade rotis await!
           </p>

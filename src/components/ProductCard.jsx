@@ -45,6 +45,19 @@ export default function ProductCard({ item }) {
   const cartItemsForProduct = items.filter(i => i.product.id === item.id)
   const totalQtyInCart = cartItemsForProduct.reduce((sum, i) => sum + i.quantity, 0)
   
+  const displayQty = totalQtyInCart > 0 ? totalQtyInCart : 1;
+  let originalTotal = (item.price || 0) * displayQty;
+  let productTotal = originalTotal;
+  
+  if (item.price !== null && item.packPrice && item.packQty) {
+    const packs = Math.floor(displayQty / item.packQty);
+    const singles = displayQty % item.packQty;
+    productTotal = (packs * item.packPrice) + (singles * item.price);
+  } else if (item.price === null) {
+    productTotal = item.packPrice * displayQty;
+    originalTotal = productTotal;
+  }
+  
   // For the stepper, we will modify the first matching cart item
   const handleIncrement = (e) => {
     e?.preventDefault?.()
@@ -122,12 +135,28 @@ export default function ProductCard({ item }) {
           <div className="flex items-center justify-between pt-3 border-t border-[#EAE5D9]/50 mt-auto min-h-[3rem]">
              <div className="flex flex-col gap-0.5" style={{ fontFamily: "var(--font-outfit)" }}>
                {item.price === null ? (
-                 <span className="text-[15px] font-bold text-[#114D3C]">₹{item.packPrice} / {item.packQty} Pcs</span>
+                 <span className="text-[15px] font-bold text-[#114D3C]">₹{productTotal} / {item.packQty * displayQty} Pcs</span>
                ) : (
                  <>
-                   <span className="text-[15px] font-bold text-[#114D3C]">₹{item.price} <span className="text-xs font-normal opacity-70">/ 1 Pc</span></span>
+                   <div className="flex items-baseline gap-1">
+                     <span className="text-[16px] font-bold text-[#114D3C] tracking-tight">₹{productTotal}</span>
+                     <span className="text-[12px] font-medium text-[#73706A]">/ {displayQty} Pc{displayQty > 1 ? 's' : ''}</span>
+                   </div>
                    {item.packPrice && (
-                     <span className="text-[10px] text-[#16A34A] font-bold bg-[#16A34A]/10 px-1.5 py-0.5 rounded uppercase tracking-wider w-fit mt-0.5">Buy {item.packQty} for ₹{item.packPrice}</span>
+                     totalQtyInCart >= item.packQty ? (
+                       <div className="flex items-center gap-1.5 mt-0.5 animate-[pulse_2s_ease-in-out_infinite]">
+                         <span className="text-[10px] text-white font-bold bg-gradient-to-r from-[#16A34A] to-[#114D3C] px-2 py-0.5 rounded uppercase tracking-wider shadow-sm">
+                           ₹{originalTotal - productTotal} DISCOUNT
+                         </span>
+                         {originalTotal > productTotal && (
+                           <span className="text-[11px] text-[#73706A] line-through font-medium opacity-80">₹{originalTotal}</span>
+                         )}
+                       </div>
+                     ) : (
+                       <span className="text-[10px] text-[#16A34A] font-bold bg-[#16A34A]/10 px-1.5 py-0.5 rounded uppercase tracking-wider w-fit mt-0.5">
+                         Buy {item.packQty} for ₹{item.packPrice}
+                       </span>
+                     )
                    )}
                  </>
                )}

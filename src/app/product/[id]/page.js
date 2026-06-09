@@ -13,18 +13,18 @@ const FOOD_IMG = "/images/indian_roti_meal.png"
 export default function ProductDetailsPage() {
   const { id } = useParams()
   const router = useRouter()
-  const { addToCart } = useCart()
+  const { addToCart, items, removeFromCart } = useCart()
   const { user } = useAuth()
 
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   
-  // State for variant selection and quantity
-  const [selectedVariant, setSelectedVariant] = useState(null)
+  // State
   const [selectedAddons, setSelectedAddons] = useState([])
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
   const [activeTab, setActiveTab] = useState('description')
+  const [initializedFromCart, setInitializedFromCart] = useState(false)
 
   const toggleAddon = (addon) => {
     setSelectedAddons(prev =>
@@ -34,10 +34,30 @@ export default function ProductDetailsPage() {
     )
   }
 
+  // Variant parsing
+  const singleVariant = product?.variants?.find(v => v.minQuantity === 1)
+  const packVariant = product?.variants?.find(v => v.minQuantity > 1)
+  
+  const price = singleVariant ? singleVariant.price : null
+  const packPrice = packVariant ? packVariant.price : null
+  const packQty = packVariant ? packVariant.minQuantity : null
+
   // Price Calculation
-  const addonsTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0)
-  const unitPrice = (selectedVariant?.price || 0) + addonsTotal
-  const totalPrice = unitPrice * quantity
+  let originalTotal = (price || 0) * quantity
+  let productTotal = originalTotal
+
+  if (price !== null && packPrice && packQty) {
+    const packs = Math.floor(quantity / packQty)
+    const singles = quantity % packQty
+    productTotal = (packs * packPrice) + (singles * price)
+  } else if (price === null && packPrice) {
+    productTotal = packPrice * quantity
+    originalTotal = productTotal
+  }
+
+  const discountAmt = originalTotal - productTotal
+  const addonsTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0) * quantity
+  const totalPrice = productTotal + addonsTotal
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -46,12 +66,6 @@ export default function ProductDetailsPage() {
         const data = await res.json()
         if (data.success && data.data) {
           setProduct(data.data)
-          // Default to the first variant if available
-          if (data.data.variants && data.data.variants.length > 0) {
-            // Prefer single if exists, otherwise first
-            const single = data.data.variants.find(v => v.minQuantity === 1)
-            setSelectedVariant(single || data.data.variants[0])
-          }
         }
       } catch (err) {
         console.error("Failed to fetch product", err)
@@ -65,25 +79,42 @@ export default function ProductDetailsPage() {
     }
   }, [id])
 
+  useEffect(() => {
+    if (product && items && !initializedFromCart) {
+      const existingItems = items.filter(i => i.product.id === (product._id || product.id || id))
+      if (existingItems.length > 0) {
+        const totalQty = existingItems.reduce((sum, i) => sum + i.quantity, 0)
+        setQuantity(totalQty)
+        setSelectedAddons(existingItems[0].addons || [])
+      }
+      setInitializedFromCart(true)
+    }
+  }, [product, items, id, initializedFromCart])
+
   const handleAddToCart = () => {
-    if (!product || !selectedVariant) return
+    if (!product) return
+
+    // Remove existing items for this product to replace them with the new configuration
+    const existingItems = items.filter(i => i.product.id === (product.id || product._id || id))
+    existingItems.forEach(i => removeFromCart(i.cartItemId))
 
     const cartItem = {
       id: product.id || product._id || id,
-      name: product.name + (selectedVariant.minQuantity > 1 ? ` (${selectedVariant.name})` : ""),
-      price: selectedVariant.price,
+      name: product.name,
+      price: price,
+      packPrice: packPrice,
+      packQty: packQty,
+      singleVariantId: singleVariant?._id,
+      packVariantId: packVariant?._id,
       image: product.images?.[0] || FOOD_IMG,
       category: product.categoryId?.name || ""
     }
 
-    // Pass the variant object if it's a pack
-    const packVariant = selectedVariant.minQuantity > 1 ? {
-      id: 'pack',
-      name: selectedVariant.name,
-      price: selectedVariant.price
-    } : null
+    const variantObj = price !== null && singleVariant 
+      ? { id: singleVariant._id, name: singleVariant.name, price: price } 
+      : packVariant ? { id: packVariant._id, name: packVariant.name, price: packPrice } : null
 
-    addToCart(cartItem, quantity, packVariant, selectedAddons)
+    addToCart(cartItem, quantity, variantObj, selectedAddons)
     
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
@@ -123,10 +154,11 @@ export default function ProductDetailsPage() {
   const catName = product.categoryId?.name || "Premium Item"
 
   // Professional dummy details based on category
+  const hash = id.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
   const nutritionFacts = {
-    cal: Math.floor(Math.random() * 300) + 150,
-    protein: Math.floor(Math.random() * 10) + 2,
-    carbs: Math.floor(Math.random() * 40) + 15,
+    cal: 150 + Math.abs(hash % 300),
+    protein: 2 + Math.abs(hash % 10),
+    carbs: 15 + Math.abs(hash % 40),
   }
 
   return (
@@ -256,7 +288,7 @@ export default function ProductDetailsPage() {
                 <div className="animate-fade-in text-[#4A5568]" style={{ fontFamily: "var(--font-outfit)" }}>
                   <h4 className="font-bold text-[#114D3C] mb-3">Chef's Note</h4>
                   <p className="text-md leading-relaxed mb-6">
-                    Our {product.name.toLowerCase()} is prepared daily in small batches to ensure maximum freshness. We source our grains, vegetables, and spices directly from premium local markets, ensuring an authentic Maharashtrian taste that reminds you of home.
+                    Our {product.name.toLowerCase()} is prepared daily in small batches to ensure maximum freshness. We source our grains, vegetables, and spices directly from premium local markets, ensuring an authentic taste that reminds you of home.
                   </p>
                   <h4 className="font-bold text-[#114D3C] mb-3">Allergen Information</h4>
                   <ul className="list-disc pl-5 space-y-1 text-sm">
@@ -268,46 +300,7 @@ export default function ProductDetailsPage() {
               )}
             </div>
 
-            {/* Variants */}
-            {product.variants && product.variants.length > 0 && (
-              <div className="mb-10">
-                <h3 className="text-sm uppercase tracking-widest text-[#73706A] font-bold mb-4" style={{ fontFamily: "var(--font-outfit)" }}>
-                  Select Quantity Option
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {product.variants.map(variant => (
-                    <button
-                      key={variant._id}
-                      onClick={() => setSelectedVariant(variant)}
-                      className={`relative overflow-hidden p-5 rounded-2xl border-2 text-left transition-all duration-300 group ${
-                        selectedVariant?._id === variant._id
-                          ? 'border-[#16A34A] bg-[#16A34A]/5 shadow-[0_8px_30px_rgba(22,163,74,0.12)]'
-                          : 'border-[#EAE5D9] bg-white hover:border-[#16A34A]/30 hover:shadow-md'
-                      }`}
-                      style={{ fontFamily: "var(--font-outfit)" }}
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <span className={`font-bold text-lg ${selectedVariant?._id === variant._id ? 'text-[#114D3C]' : 'text-[#2C3E35]'}`}>
-                          {variant.name}
-                        </span>
-                        {selectedVariant?._id === variant._id && (
-                          <div className="w-6 h-6 rounded-full bg-[#16A34A] flex items-center justify-center shadow-sm">
-                            <Check className="w-3.5 h-3.5 text-white" />
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-2xl font-bold text-[#16A34A]">₹{variant.price}</span>
-                      
-                      {variant.minQuantity > 1 && (
-                        <div className="mt-2 inline-flex text-xs font-bold bg-white border border-[#EAE5D9] text-[#73706A] px-2 py-1 rounded-md">
-                          Pack of {variant.minQuantity}
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Removed Manual Variant Selection */}
 
             {/* Add-ons Section */}
             {(product.addons && product.addons.length > 0) && (
@@ -356,7 +349,19 @@ export default function ProductDetailsPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-[#73706A] font-bold mb-1 tracking-widest uppercase" style={{ fontFamily: "var(--font-outfit)" }}>Total Price</p>
-                  <p className="text-4xl font-bold text-[#16A34A]">₹{totalPrice}</p>
+                  <div className="flex flex-col items-end">
+                    {discountAmt > 0 && (
+                      <span className="text-sm font-bold bg-[#16A34A] text-white px-2 py-0.5 rounded-md mb-1 uppercase tracking-wider text-[10px]">
+                        ₹{discountAmt} Discount
+                      </span>
+                    )}
+                    <div className="flex items-center gap-2">
+                      {discountAmt > 0 && (
+                        <span className="text-lg font-bold text-gray-400 line-through">₹{originalTotal + addonsTotal}</span>
+                      )}
+                      <p className="text-4xl font-bold text-[#16A34A]">₹{totalPrice}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -371,9 +376,9 @@ export default function ProductDetailsPage() {
                   style={{ fontFamily: "var(--font-outfit)" }}
                 >
                   {addedToCart ? (
-                    <><Check className="w-5 h-5" /> Added to Cart</>
+                    <><Check className="w-5 h-5" /> Saved to Cart</>
                   ) : (
-                    <><ShoppingCart className="w-5 h-5" /> Add to Cart</>
+                    <><ShoppingCart className="w-5 h-5" /> {items.some(i => i.product.id === (product.id || product._id || id)) ? 'Update Cart' : 'Add to Cart'}</>
                   )}
                 </button>
                 <button
@@ -406,9 +411,20 @@ export default function ProductDetailsPage() {
             >+</button>
           </div>
           <div className="text-right">
-            <p className="text-xs text-[#73706A] font-bold tracking-widest uppercase mb-1">Total</p>
-            <p className="text-2xl font-bold text-[#16A34A]">₹{totalPrice}</p>
-          </div>
+              <div className="flex flex-col items-end">
+                {discountAmt > 0 && (
+                  <span className="text-[10px] font-bold bg-[#16A34A] text-white px-1.5 py-0.5 rounded-md mb-0.5 uppercase tracking-wider">
+                    ₹{discountAmt} Off
+                  </span>
+                )}
+                <div className="flex items-center gap-1.5">
+                  {discountAmt > 0 && (
+                    <span className="text-sm font-bold text-gray-400 line-through">₹{originalTotal + addonsTotal}</span>
+                  )}
+                  <p className="text-2xl font-bold text-[#16A34A]">₹{totalPrice}</p>
+                </div>
+              </div>
+        </div>
         </div>
         <div className="flex gap-3">
           <button

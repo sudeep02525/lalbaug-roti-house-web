@@ -38,7 +38,7 @@ export function Footer() {
               <img src="/logo.jpeg" alt="Lalbaug Roti House" className="h-16 md:h-20 w-auto object-contain rounded-2xl shadow-sm border border-[#EAE5D9]" />
             </div>
             <p className="text-sm leading-relaxed mb-8 pr-4 text-white/70 font-medium" style={{ fontFamily: "var(--font-outfit)" }}>
-              Fresh handmade rotis, bhakari, thepla and homely Maharashtrian food delivered daily in Mumbai with love and care.
+              Fresh handmade rotis, bhakari, thepla and traditional food delivered daily in Mumbai with love and care.
             </p>
             <div className="flex items-center gap-4">
               <a href="#" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="Instagram">

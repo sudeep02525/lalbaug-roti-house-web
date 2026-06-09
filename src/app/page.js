@@ -169,7 +169,7 @@ export default function Home() {
             <div className="space-y-4 pl-0 lg:pl-16 xl:pl-20">
               <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-[#E6DCCF] shadow-sm">
                 <Sparkles className="w-3.5 h-3.5 text-[#16A34A]" />
-                <span className="text-xs font-bold tracking-widest uppercase text-[#114D3C]" style={{ fontFamily: "var(--font-outfit)" }}>Authentic & Homely</span>
+                <span className="text-xs font-bold tracking-widest uppercase text-[#114D3C]" style={{ fontFamily: "var(--font-outfit)" }}>Authentic & Fresh</span>
               </div>
               <h1 className="text-[4rem] lg:text-[5.5rem] font-bold leading-none text-[#114D3C] tracking-tight" style={{ fontFamily: "var(--font-playfair)" }}>
                 Har Roti,<br />
@@ -177,7 +177,7 @@ export default function Home() {
               </h1>
 
               <p className="text-[#8B5A2B] text-xl leading-relaxed font-medium max-w-lg" style={{ fontFamily: "var(--font-outfit)" }}>
-                Fresh Handmade Roti, Bhakari,<br />Thepla &amp; Homely Food
+                Fresh Handmade Roti, Bhakari,<br />Thepla &amp; Delicious Food
               </p>
 
               {/* Trust badges */}
@@ -226,7 +226,7 @@ export default function Home() {
         <div className="absolute inset-0 lg:left-auto lg:right-0 lg:w-[55%] h-full z-0 pointer-events-none opacity-20 lg:opacity-100 flex items-center justify-end">
           <img
             src="/images/hero-platter.png"
-            alt="Fresh Maharashtrian food"
+            alt="Fresh traditional food"
             className="w-full h-full object-cover scale-105 origin-right"
             style={{
               WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 15%, black 45%)',
@@ -315,9 +315,11 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
             {combos.map((item) => (
-              <ProductCard key={item.id} item={item} />
+              <div key={item.id} className="h-fit">
+                <ProductCard item={item} />
+              </div>
             ))}
           </div>
         </div>
@@ -348,7 +350,7 @@ export default function Home() {
 
           <div 
             ref={bestsellersRef}
-            className="flex overflow-x-auto gap-4 sm:gap-6 pb-8 pt-4 -mx-4 px-4 sm:-mx-8 sm:px-8 xl:-mx-12 xl:px-12 hide-scrollbar scroll-smooth"
+            className="flex items-start overflow-x-auto gap-4 sm:gap-6 pb-8 pt-4 -mx-4 px-4 sm:-mx-8 sm:px-8 xl:-mx-12 xl:px-12 hide-scrollbar scroll-smooth"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             <style jsx>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
