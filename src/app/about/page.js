@@ -1,4 +1,5 @@
 "use client"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Leaf, Award, Heart, ShieldCheck, CheckCircle2, Sprout } from "lucide-react"
 import Image from "next/image"
@@ -14,6 +15,22 @@ const staggerContainer = {
 }
 
 export default function AboutPage() {
+  const [settings, setSettings] = useState(null)
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings`)
+        const data = await res.json()
+        if (data.success && data.data) {
+          setSettings(data.data)
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings", err)
+      }
+    }
+    fetchSettings()
+  }, [])
   return (
     <div className="min-h-screen bg-[#FAF8F5] pt-32 pb-24 overflow-hidden relative">
       
@@ -35,15 +52,13 @@ export default function AboutPage() {
             <span className="text-sm font-bold text-[#14452F] tracking-widest uppercase" style={{ fontFamily: "var(--font-outfit)" }}>Our Heritage</span>
           </div>
           
-          <h1 className="text-5xl lg:text-7xl font-bold text-[#14452F] mb-8 tracking-tight leading-tight" style={{ fontFamily: "var(--font-playfair)" }}>
-            The Story Behind <br/>
-            <span className="text-[#E8A359] italic pr-2">Har Roti, Dil Se</span>
+          <h1 className="text-5xl lg:text-7xl font-bold text-[#14452F] mb-8 tracking-tight leading-tight whitespace-pre-line" style={{ fontFamily: "var(--font-playfair)" }}>
+            {settings?.aboutHeroTitle || 'The Story Behind'} <br/>
+            <span className="text-[#E8A359] italic pr-2">{settings?.aboutHeroSubtitle || 'Har Roti, Dil Se'}</span>
           </h1>
           
-          <p className="text-xl text-[#73706A] leading-relaxed max-w-3xl mx-auto" style={{ fontFamily: "var(--font-outfit)" }}>
-            At Lalbaug Roti House, we believe that nothing beats the taste of a warm, handmade roti. 
-            Born out of a passion for authentic traditional food, our journey started with a simple goal: 
-            to bring the comfort of home-cooked meals to every dining table in Mumbai.
+          <p className="text-xl text-[#73706A] leading-relaxed max-w-3xl mx-auto whitespace-pre-line" style={{ fontFamily: "var(--font-outfit)" }}>
+            {settings?.aboutHeroDescription || 'At Lalbaug Roti House, we believe that nothing beats the taste of a warm, handmade roti. \nBorn out of a passion for authentic traditional food, our journey started with a simple goal: \nto bring the comfort of home-cooked meals to every dining table in Mumbai.'}
           </p>
         </motion.div>
 
@@ -60,10 +75,8 @@ export default function AboutPage() {
               <Heart className="w-10 h-10 text-[#E8A359]" />
             </div>
             <h3 className="text-3xl font-bold mb-6 text-[#14452F]" style={{ fontFamily: "var(--font-playfair)" }}>Our Mission</h3>
-            <p className="text-[#73706A] leading-relaxed text-lg" style={{ fontFamily: "var(--font-outfit)" }}>
-              To provide fresh, hygienic, and authentic handmade breads and meals daily. We strive to be the 
-              reliable kitchen for busy professionals, families, and events by never compromising on the 
-              quality of ingredients or the traditional methods of cooking.
+            <p className="text-[#73706A] leading-relaxed text-lg whitespace-pre-line" style={{ fontFamily: "var(--font-outfit)" }}>
+              {settings?.missionDescription || 'To provide fresh, hygienic, and authentic handmade breads and meals daily. We strive to be the \nreliable kitchen for busy professionals, families, and events by never compromising on the \nquality of ingredients or the traditional methods of cooking.'}
             </p>
           </motion.div>
 
@@ -72,10 +85,8 @@ export default function AboutPage() {
               <Award className="w-10 h-10 text-[#E8A359]" />
             </div>
             <h3 className="text-3xl font-bold mb-6 text-[#14452F]" style={{ fontFamily: "var(--font-playfair)" }}>Our Vision</h3>
-            <p className="text-[#73706A] leading-relaxed text-lg" style={{ fontFamily: "var(--font-outfit)" }}>
-              To become the most trusted food brand in Mumbai for traditional staples. We envision a future 
-              where our name resonates with every customer, symbolizing our unwavering commitment 
-              to health, taste, and premium service.
+            <p className="text-[#73706A] leading-relaxed text-lg whitespace-pre-line" style={{ fontFamily: "var(--font-outfit)" }}>
+              {settings?.visionDescription || 'To become the most trusted food brand in Mumbai for traditional staples. We envision a future \nwhere our name resonates with every customer, symbolizing our unwavering commitment \nto health, taste, and premium service.'}
             </p>
           </motion.div>
         </motion.div>

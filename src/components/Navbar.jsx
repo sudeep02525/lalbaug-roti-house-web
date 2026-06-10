@@ -68,7 +68,7 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 bg-white shadow-[0_4px_20px_rgb(0,0,0,0.08)] ${scrolled ? "" : "lg:bg-transparent lg:shadow-none"} ${pathname === '/profile' ? 'lg:hidden' : ''}`}
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-[background-color,box-shadow] duration-300 bg-white shadow-[0_4px_20px_rgb(0,0,0,0.08)] ${scrolled ? "" : "lg:bg-transparent lg:shadow-none"} ${pathname === '/profile' ? 'lg:hidden' : ''}`}
     >
       {/* Global Store Closed Banner */}
       {mounted && storeStatus && !storeStatus.isOpen && (
@@ -78,10 +78,10 @@ export function Navbar() {
         </div>
       )}
       <div
-        className={`container transition-all duration-300 py-0 ${scrolled ? "" : "lg:py-6"}`}
+        className={`container transition-[padding] duration-300 ease-out py-0 ${scrolled ? "" : "lg:py-4"}`}
       >
         <div
-          className={`flex items-center justify-between transition-all duration-300 h-20 px-4 border border-transparent bg-transparent shadow-none ${scrolled ? "lg:px-0" : "lg:px-8 lg:bg-white/95 lg:backdrop-blur-md lg:shadow-[0_8px_30px_rgba(22,163,74,0.1)] lg:rounded-2xl lg:border-[#16A34A]/20"}`}
+          className={`flex items-center justify-between transition-[background-color,border-color,box-shadow,padding,border-radius] duration-300 ease-out h-20 px-4 border border-transparent bg-transparent shadow-none ${scrolled ? "lg:px-0" : "lg:px-8 lg:bg-white/95 lg:shadow-[0_8px_30px_rgba(22,163,74,0.1)] lg:rounded-2xl lg:border-[#16A34A]/20"}`}
         >
           {/* Logo */}
           <Link

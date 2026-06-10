@@ -22,6 +22,22 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [settings, setSettings] = useState(null)
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings`)
+        const data = await res.json()
+        if (data.success && data.data) {
+          setSettings(data.data)
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings", err)
+      }
+    }
+    fetchSettings()
+  }, [])
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value })
 
@@ -29,9 +45,10 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSubmitting(true)
     
+    const waNumber = settings?.whatsappNumber || '919920688099';
     const waText = `Hello *Lalbaug Roti House* Team! \\u{1F44B}\n\nI have a new query from your website contact form:\n\n\\u{1F464} *Customer Details:*\n• *Name:* ${formData.name}\n• *Email:* ${formData.email}\n\n\\u{1F4DD} *Query Information:*\n• *Subject:* ${formData.subject}\n• *Message:*\n"${formData.message}"\n\nPlease reply to me as soon as possible. Thank you! \\u{1F64F}`;
     const encodedText = encodeURIComponent(waText)
-    window.open(`https://wa.me/919920688099?text=${encodedText}`, '_blank')
+    window.open(`https://wa.me/${waNumber}?text=${encodedText}`, '_blank')
     
     setIsSubmitting(false)
     setFormData({ name: '', email: '', subject: '', message: '' })
@@ -89,10 +106,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-sm text-[#73706A] uppercase tracking-widest mb-2 font-outfit">Visit Us</h4>
-                    <p className="font-medium text-[#1A4D2E] leading-relaxed text-lg font-outfit">
-                      Lalbaug Roti House<br />
-                      Shop No 17/45, HY, Ganesh Nagar,<br />
-                      Lal Baug, Mumbai - 400012
+                    <p className="font-medium text-[#1A4D2E] leading-relaxed text-lg font-outfit whitespace-pre-line">
+                      {settings?.restaurantAddress || 'Shop No 17/45, HY, Ganesh Nagar, Lal Baug, Mumbai - 400012'}
                     </p>
                   </div>
                 </motion.div>
@@ -104,8 +119,8 @@ export default function ContactPage() {
                   <div>
                     <h4 className="font-bold text-sm text-[#73706A] uppercase tracking-widest mb-2 font-outfit">Call / WhatsApp</h4>
                     <p className="font-medium text-[#1A4D2E] text-lg font-outfit">
-                      +91 93246 88099<br />
-                      +91 99206 88099
+                      {settings?.restaurantPhone ? `+91 ${settings.restaurantPhone}` : '+91 93246 88099'}<br />
+                      {settings?.whatsappNumber ? `+${settings.whatsappNumber}` : '+91 99206 88099'}
                     </p>
                   </div>
                 </motion.div>
@@ -116,7 +131,9 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-sm text-[#73706A] uppercase tracking-widest mb-2 font-outfit">Email</h4>
-                    <p className="font-medium text-[#1A4D2E] text-base sm:text-lg font-outfit break-all">lalbaugrotihouse@gmail.com</p>
+                    <p className="font-medium text-[#1A4D2E] text-base sm:text-lg font-outfit break-all">
+                      {settings?.restaurantEmail || 'lalbaugrotihouse@gmail.com'}
+                    </p>
                   </div>
                 </motion.div>
 

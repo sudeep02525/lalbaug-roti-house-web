@@ -64,6 +64,9 @@ export default function Home() {
   const [bestsellers, setBestsellers] = useState([])
   const [combos, setCombos] = useState([])
 
+  // Global Settings State
+  const [settings, setSettings] = useState(null)
+
   const bestsellersRef = useRef(null)
   const scrollBestsellers = (dir) => {
     if (bestsellersRef.current) {
@@ -121,12 +124,37 @@ export default function Home() {
     fetchMenu()
   }, [])
 
+  const [currentCraftImageIndex, setCurrentCraftImageIndex] = useState(0)
+
   useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/v1/settings`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSettings(data.data)
+        }
+      })
+      .catch(err => console.error('Failed to fetch settings:', err))
+  }, [])
+
+  useEffect(() => {
+    // Original hover animation logic for Wheat vs Kitchen
     const interval = setInterval(() => {
       setIsWheatFront(prev => !prev)
     }, 4000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    // Slideshow for craft images (excluding the first image used for the front)
+    const galleryImages = (settings?.craftImages || []).slice(1)
+    if (galleryImages.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentCraftImageIndex(prev => (prev + 1) % galleryImages.length)
+      }, 3500)
+      return () => clearInterval(interval)
+    }
+  }, [settings?.craftImages])
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault()
@@ -172,12 +200,12 @@ export default function Home() {
                 <span className="text-xs font-bold tracking-widest uppercase text-[#114D3C]" style={{ fontFamily: "var(--font-outfit)" }}>Authentic & Fresh</span>
               </div>
               <h1 className="text-[4rem] lg:text-[5.5rem] font-bold leading-none text-[#114D3C] tracking-tight" style={{ fontFamily: "var(--font-playfair)" }}>
-                Har Roti,<br />
-                <em className="text-[#16A34A] font-normal not-italic tracking-normal pr-1" style={{ fontFamily: "var(--font-great-vibes)", fontSize: "1.1em", lineHeight: "0.8" }}>Dil Se!</em> <span className="text-4xl inline-block -rotate-6">🌿</span>
+                {settings?.heroTitle1 || 'Har Roti,'}<br />
+                <em className="text-[#16A34A] font-normal not-italic tracking-normal pr-1" style={{ fontFamily: "var(--font-great-vibes)", fontSize: "1.1em", lineHeight: "0.8" }}>{settings?.heroTitle2 || 'Dil Se!'}</em> <span className="text-4xl inline-block -rotate-6">🌿</span>
               </h1>
 
-              <p className="text-[#8B5A2B] text-xl leading-relaxed font-medium max-w-lg" style={{ fontFamily: "var(--font-outfit)" }}>
-                Fresh Handmade Roti, Bhakari,<br />Thepla &amp; Delicious Food
+              <p className="text-[#8B5A2B] text-xl leading-relaxed font-medium max-w-lg whitespace-pre-line" style={{ fontFamily: "var(--font-outfit)" }}>
+                {settings?.heroSubtitle || 'Fresh Handmade Roti, Bhakari,\nThepla & Delicious Food'}
               </p>
 
               {/* Trust badges */}
@@ -225,7 +253,7 @@ export default function Home() {
         {/* Bleeding Background Image */}
         <div className="absolute inset-0 lg:left-auto lg:right-0 lg:w-[55%] h-full z-0 pointer-events-none opacity-20 lg:opacity-100 flex items-center justify-end">
           <img
-            src="/images/hero-platter.png"
+            src={settings?.heroImage ? (settings.heroImage.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${settings.heroImage}` : settings.heroImage) : "/images/hero-platter.png"}
             alt="Fresh traditional food"
             className="w-full h-full object-cover scale-105 origin-right"
             style={{
@@ -243,15 +271,33 @@ export default function Home() {
             <div 
               className="relative h-[400px] sm:h-[500px] w-full group" 
             >
-              {/* Wheat Image */}
+              {/* Front Image (First uploaded image) */}
               <div className={`absolute inset-0 rounded-[2rem] overflow-hidden transition-all duration-1000 ease-in-out ${isWheatFront ? 'z-20 shadow-2xl scale-100 rotate-0' : 'z-10 shadow-lg -rotate-3 scale-105'}`}>
-                <img src="/images/wheat_background.png" alt="Wheat grains" className={`w-full h-full object-cover transition-all duration-1000 ${isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
+                {settings?.craftImages && settings.craftImages.length > 0 ? (
+                  <img src={settings.craftImages[0].startsWith('/uploads') || settings.craftImages[0].startsWith('/images') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${settings.craftImages[0]}` : settings.craftImages[0]} alt="Our Craft" className={`w-full h-full object-cover transition-all duration-1000 ${isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
+                ) : (
+                  <img src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/images/wheat_background.png`} alt="Our Craft" className={`w-full h-full object-cover transition-all duration-1000 ${isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
+                )}
                 <div className={`absolute inset-0 bg-[#114D3C]/10 mix-blend-multiply transition-opacity duration-1000 pointer-events-none ${isWheatFront ? 'opacity-0' : 'opacity-100'}`}></div>
               </div>
 
-              {/* Kitchen Image */}
+              {/* Back Image Gallery (Remaining uploaded images) */}
               <div className={`absolute inset-0 rounded-[2rem] overflow-hidden transition-all duration-1000 ease-in-out ${!isWheatFront ? 'z-20 shadow-2xl scale-100 rotate-0' : 'z-10 shadow-lg -rotate-3 scale-105'}`}>
-                <img src={KITCHEN_IMG} alt="Our Kitchen" className={`w-full h-full object-cover transition-all duration-1000 ${!isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
+                {settings?.craftImages && settings.craftImages.length > 1 ? (
+                  settings.craftImages.slice(1).map((img, idx) => {
+                    const imgUrl = img.startsWith('/uploads') || img.startsWith('/images') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${img}` : img;
+                    return (
+                      <img 
+                        key={idx} 
+                        src={imgUrl} 
+                        alt="Our Kitchen" 
+                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${currentCraftImageIndex === idx ? 'opacity-100' : 'opacity-0'}`} 
+                      />
+                    );
+                  })
+                ) : (
+                  <img src={settings?.craftImage ? (settings.craftImage.startsWith('/uploads') || settings.craftImage.startsWith('/images') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${settings.craftImage}` : settings.craftImage) : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${KITCHEN_IMG}`} alt="Our Kitchen" className={`w-full h-full object-cover transition-all duration-1000 ${!isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
+                )}
                 <div className={`absolute inset-0 bg-[#114D3C]/10 mix-blend-multiply transition-opacity duration-1000 pointer-events-none ${!isWheatFront ? 'opacity-0' : 'opacity-100'}`}></div>
               </div>
 
@@ -273,14 +319,11 @@ export default function Home() {
                 <span className="w-12 h-[2px] bg-[#16A34A]"></span>
                 <span className="text-sm font-bold text-[#16A34A] tracking-[0.2em] uppercase" style={{ fontFamily: "var(--font-outfit)" }}>Our Philosophy</span>
               </div>
-              <h2 className="text-4xl lg:text-5xl font-bold text-[#114D3C] leading-tight" style={{ fontFamily: "var(--font-playfair)" }}>
-                The Art of <br/>Perfect Dough
+              <h2 className="text-4xl lg:text-5xl font-bold text-[#114D3C] leading-tight whitespace-pre-line" style={{ fontFamily: "var(--font-playfair)" }}>
+                {settings?.craftTitle || 'The Art of \nPerfect Dough'}
               </h2>
-              <p className="text-lg text-[#8B5A2B] leading-relaxed" style={{ fontFamily: "var(--font-outfit)" }}>
-                We believe that good food starts with pure ingredients. Every morning, our dough is freshly kneaded using premium wheat flour without any preservatives or artificial additives.
-              </p>
-              <p className="text-lg text-[#8B5A2B] leading-relaxed pb-4" style={{ fontFamily: "var(--font-outfit)" }}>
-                Rolled with care and cooked to perfection, our rotis offer the authentic taste of home, delivering warmth and comfort straight to your table.
+              <p className="text-lg text-[#8B5A2B] leading-relaxed pb-4 whitespace-pre-line" style={{ fontFamily: "var(--font-outfit)" }}>
+                {settings?.craftDescription || 'We believe that good food starts with pure ingredients. Every morning, our dough is freshly kneaded using premium wheat flour without any preservatives or artificial additives.\n\nRolled with care and cooked to perfection, our rotis offer the authentic taste of home, delivering warmth and comfort straight to your table.'}
               </p>
               <Link
                 href="/about"

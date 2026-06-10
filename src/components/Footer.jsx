@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation";
 import { Phone, MapPin, Mail, ChevronRight, Send } from "lucide-react"
@@ -19,6 +20,23 @@ const InstagramIcon = ({ className }) => (
 
 export function Footer() {
   const pathname = usePathname();
+  const [settings, setSettings] = useState(null)
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings`)
+        const data = await res.json()
+        if (data.success && data.data) {
+          setSettings(data.data)
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings", err)
+      }
+    }
+    fetchSettings()
+  }, [])
+
   if (pathname === '/order-success') return null;
 
   return (
@@ -38,16 +56,16 @@ export function Footer() {
               <img src="/logo.jpeg" alt="Lalbaug Roti House" className="h-16 md:h-20 w-auto object-contain rounded-2xl shadow-sm border border-[#EAE5D9]" />
             </div>
             <p className="text-sm leading-relaxed mb-8 pr-4 text-white/70 font-medium" style={{ fontFamily: "var(--font-outfit)" }}>
-              Fresh handmade rotis, bhakari, thepla and traditional food delivered daily in Mumbai with love and care.
+              {settings?.footerDescription || 'Fresh handmade rotis, bhakari, thepla and traditional food delivered daily in Mumbai with love and care.'}
             </p>
             <div className="flex items-center gap-4">
-              <a href="#" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="Instagram">
+              <a href={settings?.instagramUrl || '#'} target="_blank" rel="noopener noreferrer" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="Instagram">
                 <InstagramIcon className="w-4 h-4" />
               </a>
-              <a href="#" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="Facebook">
+              <a href={settings?.facebookUrl || '#'} target="_blank" rel="noopener noreferrer" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="Facebook">
                 <FacebookIcon className="w-4 h-4" />
               </a>
-              <a href="https://wa.me/919324688099" target="_blank" rel="noopener noreferrer" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="WhatsApp">
+              <a href={`https://wa.me/${settings?.whatsappNumber || '919920688099'}`} target="_blank" rel="noopener noreferrer" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="WhatsApp">
                 <Phone className="w-4 h-4 fill-current" />
               </a>
             </div>
@@ -108,22 +126,24 @@ export function Footer() {
                 <div className="w-8 h-8 rounded-full bg-[#C19B6C]/10 flex items-center justify-center shrink-0 group-hover:bg-[#C19B6C] transition-colors duration-300">
                   <MapPin className="w-4 h-4 text-[#C19B6C] group-hover:text-white transition-colors duration-300" />
                 </div>
-                <span className="leading-relaxed text-white/70 group-hover:text-white transition-colors">Shop No 17/45, HY, Ganesh Nagar,<br />Lal Baug, Mumbai - 400012</span>
+                <span className="leading-relaxed text-white/70 group-hover:text-white transition-colors whitespace-pre-line">
+                  {settings?.restaurantAddress || 'Shop No 17/45, HY, Ganesh Nagar,\nLal Baug, Mumbai - 400012'}
+                </span>
               </li>
               <li className="flex gap-4 items-start group">
                 <div className="w-8 h-8 rounded-full bg-[#C19B6C]/10 flex items-center justify-center shrink-0 group-hover:bg-[#C19B6C] transition-colors duration-300">
                   <Phone className="w-4 h-4 text-[#C19B6C] group-hover:text-white transition-colors duration-300" />
                 </div>
                 <span className="leading-relaxed text-white/70 group-hover:text-white transition-colors">
-                  +91 93246 88099 / +91 99206 88099<br />
-                  <span className="text-[#C19B6C] text-xs font-medium">Mon-Sun, 10:00 AM - 10:00 PM</span>
+                  {settings?.restaurantPhone ? `+91 ${settings.restaurantPhone}` : '+91 93246 88099'} / {settings?.whatsappNumber ? `+${settings.whatsappNumber}` : '+91 99206 88099'}<br />
+                  <span className="text-[#C19B6C] text-xs font-medium">Mon-Sun, {settings?.serviceStartTime || '10:00'} - {settings?.serviceEndTime || '22:00'}</span>
                 </span>
               </li>
               <li className="flex gap-4 items-start group">
                 <div className="w-8 h-8 rounded-full bg-[#C19B6C]/10 flex items-center justify-center shrink-0 group-hover:bg-[#C19B6C] transition-colors duration-300">
                   <Mail className="w-4 h-4 text-[#C19B6C] group-hover:text-white transition-colors duration-300" />
                 </div>
-                <span className="leading-relaxed text-white/70 group-hover:text-white transition-colors">lalbaugrotihouse@gmail.com</span>
+                <span className="leading-relaxed text-white/70 group-hover:text-white transition-colors">{settings?.restaurantEmail || 'lalbaugrotihouse@gmail.com'}</span>
               </li>
             </ul>
           </div>
