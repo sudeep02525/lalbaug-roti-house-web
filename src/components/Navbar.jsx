@@ -18,7 +18,7 @@ export function Navbar() {
 
   // Apply global padding to body when the banner is visible to prevent overlap
   useEffect(() => {
-    const hiddenNavPages = ['/cart', '/checkout', '/order-success'];
+    const hiddenNavPages = ['/cart', '/checkout', '/order-success', '/login', '/signup'];
     const isNavHidden = hiddenNavPages.some(p => pathname?.startsWith(p)) || pathname?.startsWith('/product');
     
     if (mounted && storeStatus && !storeStatus.isOpen && !isNavHidden) {
