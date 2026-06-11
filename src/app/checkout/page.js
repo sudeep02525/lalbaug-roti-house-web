@@ -242,7 +242,7 @@ export default function CheckoutPage() {
             
             setIsOrderSuccess(true)
             clearCart()
-            router.push(`/order-success?id=${order.orderNumber}&total=${grandTotal}&addr=${encodeURIComponent(formData.address)}`)
+            router.push(`/order-success?id=${order.orderNumber}&total=${grandTotal}&addr=${encodeURIComponent(formData.address)}&paymentId=${response.razorpay_payment_id}`)
           } catch (err) {
             alert('Payment verification failed. Please contact support.')
           }

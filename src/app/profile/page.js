@@ -518,9 +518,23 @@ export default function ProfilePage() {
                       </div>
 
                       {/* Order Footer */}
-                      <div className="flex items-center justify-between pt-6 border-t border-[#E8E1D5]/50 bg-[#FAF5E9]/50 -mx-6 -mb-6 px-6 py-4 rounded-b-3xl">
-                        <span className="text-sm font-bold text-[#1A4D2E] uppercase tracking-widest">Total Paid</span>
-                        <span className="text-2xl font-bold text-[#1A4D2E] font-outfit">₹{order.totalAmount}</span>
+                      <div className="flex flex-col gap-3 pt-6 border-t border-[#E8E1D5]/50 bg-[#FAF5E9]/50 -mx-6 -mb-6 px-6 py-4 rounded-b-3xl">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-[#8B5E3C] uppercase tracking-widest">Payment Status</span>
+                          <span className={`text-xs font-bold px-2 py-1 rounded-md uppercase tracking-widest ${order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}`}>
+                            {order.paymentStatus || 'PENDING'}
+                          </span>
+                        </div>
+                        {order.razorpayPaymentId && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-[#8B5E3C] uppercase tracking-widest">Transaction ID</span>
+                            <span className="text-xs font-mono text-[#8B5E3C]">{order.razorpayPaymentId}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between pt-2 border-t border-[#E8E1D5]/50">
+                          <span className="text-sm font-bold text-[#1A4D2E] uppercase tracking-widest">Total Amount</span>
+                          <span className="text-2xl font-bold text-[#1A4D2E] font-outfit">₹{order.totalAmount}</span>
+                        </div>
                       </div>
 
                     </div>

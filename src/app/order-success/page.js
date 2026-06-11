@@ -12,6 +12,8 @@ function SuccessContent() {
   const total = searchParams.get('total') || '0'
   const addr = searchParams.get('addr') || 'N/A'
 
+  const paymentId = searchParams.get('paymentId') || ''
+
   return (
     <div className="container mx-auto px-4 py-16 flex flex-col items-center">
       <div className="w-24 h-24 bg-[var(--success)]/10 text-[var(--success)] rounded-full flex items-center justify-center mb-8 animate-bounce">
@@ -44,9 +46,10 @@ function SuccessContent() {
                 <CreditCard className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-lg">Payment Status</h3>
-                <p className="text-[var(--muted-foreground)]">Paid Successfully via Razorpay</p>
-                <p className="font-bold text-xl mt-1">₹{total}</p>
+                <h3 className="font-bold text-lg">Payment Details</h3>
+                <p className="text-[var(--muted-foreground)] text-sm mb-1">Status: <span className="text-[var(--success)] font-medium">Paid via Razorpay</span></p>
+                {paymentId && <p className="text-[var(--muted-foreground)] text-sm mb-2">Txn ID: <span className="font-mono">{paymentId}</span></p>}
+                <p className="font-bold text-xl mt-1 text-[var(--foreground)]">Total: ₹{total}</p>
               </div>
             </div>
             
