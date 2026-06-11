@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext'
 import { User, Phone, MapPin, Package, Clock, ShieldCheck, Loader2, ChevronRight, LogOut, CheckCircle2, Plus, Edit2, Trash2, X, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { MapPicker } from '@/components/MapPicker'
+import axios from 'axios'
 
 // Same floating input component used in checkout
 const FloatingInput = ({ label, value, onChange, placeholder, type = 'text', required = false }) => (
@@ -58,13 +59,14 @@ export default function ProfilePage() {
     const fetchOrders = async () => {
       if (!user) return
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders/my-orders`, {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders/my-orders`, {
           headers: {
             'Authorization': `Bearer ${user.token}`
-          }
+          },
+          validateStatus: () => true
         })
-        const data = await res.json()
-        if (res.ok && data.success) {
+        const data = res.data
+        if ((res.status === 200 || res.status === 201) && data.success) {
           setOrders(data.data)
         }
       } catch (err) {

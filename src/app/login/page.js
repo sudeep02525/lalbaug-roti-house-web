@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 import { ArrowRight, Mail, Lock, Loader2, Leaf, X, ArrowLeft } from 'lucide-react'
+import axios from 'axios'
 
 function LoginContent() {
   const router = useRouter()
@@ -44,13 +45,9 @@ function LoginContent() {
     setForgotError("")
     setForgotMessage("")
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: forgotEmail }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || "Failed to resend OTP")
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/forgot-password`, { email: forgotEmail }, { validateStatus: () => true })
+      const data = res.data
+      if (res.status !== 200 && res.status !== 201) throw new Error(data.message || "Failed to resend OTP")
       setForgotTimer(60)
       setForgotCanResend(false)
       setForgotMessage("OTP resent successfully")
@@ -69,13 +66,9 @@ function LoginContent() {
     setForgotLoading(true)
     
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: forgotEmail }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || "Failed to send OTP")
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/forgot-password`, { email: forgotEmail }, { validateStatus: () => true })
+      const data = res.data
+      if (res.status !== 200 && res.status !== 201) throw new Error(data.message || "Failed to send OTP")
       setForgotMessage(data.message || "OTP sent to your email")
       setForgotStep(2)
       setForgotTimer(60)
@@ -94,13 +87,12 @@ function LoginContent() {
     setForgotLoading(true)
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: forgotEmail, otp: forgotOtp, newPassword: forgotNewPassword }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || "Failed to reset password")
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/reset-password`, 
+        { email: forgotEmail, otp: forgotOtp, newPassword: forgotNewPassword },
+        { validateStatus: () => true }
+      )
+      const data = res.data
+      if (res.status !== 200 && res.status !== 201) throw new Error(data.message || "Failed to reset password")
       
       setForgotMessage("Password reset successfully! You can now login.")
       setTimeout(() => {

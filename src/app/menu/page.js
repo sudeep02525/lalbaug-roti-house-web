@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import { ShoppingCart, Plus, Minus, Search, Leaf, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import axios from 'axios'
 
 import ProductCard from '@/components/ProductCard'
 
@@ -73,8 +74,8 @@ function MenuContent() {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/catalog/menu`)
-      .then(res => res.json())
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/catalog/menu`, { validateStatus: () => true })
+      .then(res => res.data)
       .then(data => {
         if(data.success) {
           setMenuData(data.data)

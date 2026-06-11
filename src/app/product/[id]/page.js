@@ -5,6 +5,7 @@ import { useCart } from "@/context/CartContext"
 import { useAuth } from "@/context/AuthContext"
 import { Leaf, ChevronLeft, ShoppingCart, CreditCard, Check, ShieldCheck, Clock, Award, Info, Flame, Droplets, Plus } from "lucide-react"
 import Link from "next/link"
+import axios from "axios"
 
 import { getImageUrl } from '@/components/ProductCard'
 
@@ -62,8 +63,8 @@ export default function ProductDetailsPage() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/catalog/products/${id}`)
-        const data = await res.json()
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/catalog/products/${id}`, { validateStatus: () => true })
+        const data = res.data
         if (data.success && data.data) {
           setProduct(data.data)
         }

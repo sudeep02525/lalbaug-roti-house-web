@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation";
 import { Phone, MapPin, Mail, ChevronRight, Send } from "lucide-react"
+import axios from "axios"
 
 const FacebookIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -25,8 +26,8 @@ export function Footer() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings`)
-        const data = await res.json()
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings`, { validateStatus: () => true })
+        const data = res.data
         if (data.success && data.data) {
           setSettings(data.data)
         }

@@ -9,10 +9,30 @@ import { CheckCircle2, Package, MapPin, CreditCard } from 'lucide-react'
 function SuccessContent() {
   const searchParams = useSearchParams()
   const orderId = searchParams.get('id') || 'ORD_UNKNOWN'
+  const oid = searchParams.get('oid')
   const total = searchParams.get('total') || '0'
   const addr = searchParams.get('addr') || 'N/A'
-
   const paymentId = searchParams.get('paymentId') || ''
+
+  const [orderDetails, setOrderDetails] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (oid) {
+      import('axios').then(axios => {
+        axios.default.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders/${oid}`, { validateStatus: () => true })
+          .then(res => {
+            if (res.status === 200 || res.status === 201) {
+              setOrderDetails(res.data.data)
+            }
+          })
+          .catch(err => console.error(err))
+          .finally(() => setLoading(false))
+      })
+    } else {
+      setLoading(false)
+    }
+  }, [oid])
 
   return (
     <div className="container mx-auto px-4 py-16 flex flex-col items-center">
@@ -59,9 +79,57 @@ function SuccessContent() {
               </div>
               <div>
                 <h3 className="font-bold text-lg">Delivery Address</h3>
-                <p className="text-[var(--muted-foreground)] leading-relaxed">{addr}</p>
+                <p className="text-[var(--muted-foreground)] leading-relaxed">{orderDetails?.address?.addressLine1 || addr}</p>
+                {orderDetails?.address?.landmark && (
+                  <p className="text-[var(--muted-foreground)] text-sm">Landmark: {orderDetails.address.landmark}</p>
+                )}
+                {orderDetails?.address?.phone && (
+                  <p className="text-[var(--muted-foreground)] text-sm">Phone: {orderDetails.address.phone}</p>
+                )}
               </div>
             </div>
+
+            {orderDetails && orderDetails.items && orderDetails.items.length > 0 && (
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center shrink-0">
+                  <Package className="w-5 h-5" />
+                </div>
+                <div className="w-full">
+                  <h3 className="font-bold text-lg mb-4">Itemized Bill</h3>
+                  <div className="space-y-4">
+                    {orderDetails.items.map((item, index) => (
+                      <div key={index} className="flex justify-between items-start border-b border-[var(--border)] pb-4 last:border-0 last:pb-0">
+                        <div>
+                          <p className="font-medium text-[var(--foreground)]">{item.name}</p>
+                          <p className="text-sm text-[var(--muted-foreground)]">Quantity: {item.quantity}</p>
+                          {item.addons && item.addons.length > 0 && (
+                            <p className="text-xs text-[var(--muted-foreground)] mt-1">
+                              Addons: {item.addons.map(a => a.name).join(', ')}
+                            </p>
+                          )}
+                        </div>
+                        <p className="font-bold text-[var(--foreground)]">₹{item.price * item.quantity}</p>
+                      </div>
+                    ))}
+                    
+                    <div className="pt-4 mt-4 border-t border-[var(--border)]">
+                      <div className="flex justify-between text-sm text-[var(--muted-foreground)] mb-2">
+                        <span>Subtotal</span>
+                        <span>₹{orderDetails.subtotal}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-[var(--muted-foreground)] mb-2">
+                        <span>Delivery Charge</span>
+                        <span>₹{orderDetails.deliveryCharge}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-lg text-[var(--foreground)] mt-4">
+                        <span>Total Paid</span>
+                        <span>₹{orderDetails.totalAmount}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, Phone, Mail, Clock, Send, MessageSquareHeart } from "lucide-react"
+import axios from 'axios'
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -27,8 +28,8 @@ export default function ContactPage() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings`)
-        const data = await res.json()
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings`, { validateStatus: () => true })
+        const data = res.data
         if (data.success && data.data) {
           setSettings(data.data)
         }

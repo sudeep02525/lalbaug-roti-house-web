@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 
 const CartContext = createContext();
 
@@ -32,12 +33,12 @@ export function CartProvider({ children }) {
   useEffect(() => {
     const fetchStoreStatus = async () => {
       try {
-        const res = await fetch(
+        const res = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings?t=${new Date().getTime()}`,
-          { cache: 'no-store' }
+          { validateStatus: () => true }
         );
-        if (res.ok) {
-          const data = await res.json();
+        if (res.status === 200) {
+          const data = res.data;
           const settings = data.data;
 
           if (settings.isAcceptingOrders === false) {

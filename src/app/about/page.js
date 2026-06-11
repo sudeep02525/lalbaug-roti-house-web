@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Leaf, Award, Heart, ShieldCheck, CheckCircle2, Sprout } from "lucide-react"
 import Image from "next/image"
+import axios from "axios"
 
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
@@ -20,8 +21,8 @@ export default function AboutPage() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings`)
-        const data = await res.json()
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings`, { validateStatus: () => true })
+        const data = res.data
         if (data.success && data.data) {
           setSettings(data.data)
         }

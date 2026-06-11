@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import axios from "axios";
 import {
   ArrowRight,
   User,
@@ -51,21 +52,18 @@ function SignupContent() {
     setOtpMessage("");
     setOtpError("");
     try {
-      const res = await fetch(
+      const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/signup`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-            phone: formData.phone,
-          }),
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
         },
+        { validateStatus: () => true }
       );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to send OTP");
+      const data = res.data;
+      if (res.status !== 200 && res.status !== 201) throw new Error(data.message || "Failed to send OTP");
       setOtpMessage(data.message || "OTP sent to your email");
       setStep("otp");
       setTimer(60);
@@ -83,22 +81,19 @@ function SignupContent() {
     setOtpError("");
     setOtpMessage("");
     try {
-      const res = await fetch(
+      const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/verify-otp`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            otp,
-            name: formData.name,
-            password: formData.password,
-            phone: formData.phone,
-          }),
+          email: formData.email,
+          otp,
+          name: formData.name,
+          password: formData.password,
+          phone: formData.phone,
         },
+        { validateStatus: () => true }
       );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Verification failed");
+      const data = res.data;
+      if (res.status !== 200 && res.status !== 201) throw new Error(data.message || "Verification failed");
 
       setOtpMessage("Sign up successful! Redirecting to login...");
 
@@ -115,16 +110,12 @@ function SignupContent() {
     if (!canResend) return;
     setLoading(true);
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          phone: formData.phone,
-        }),
-      });
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/signup`, {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+      }, { validateStatus: () => true });
       setTimer(60);
       setCanResend(false);
       setOtpMessage("OTP resent successfully");

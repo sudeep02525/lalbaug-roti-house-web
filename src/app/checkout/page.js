@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext'
 import { MapPicker } from '@/components/MapPicker'
 import { getImageUrl } from '@/components/ProductCard'
 import { CheckCircle2, AlertCircle, CreditCard, MapPin, Loader2, ChevronLeft, ShieldCheck, ArrowRight, Receipt, Map, Plus } from 'lucide-react'
+import axios from 'axios'
 
 const KITCHEN_LAT = 18.9910
 const KITCHEN_LNG = 72.8356
@@ -193,16 +194,14 @@ export default function CheckoutPage() {
         notes: formData.notes,
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders`, {
-        method: 'POST',
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders`, payload, {
         headers: { 
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${user.token}`
         },
-        body: JSON.stringify(payload),
+        validateStatus: () => true
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Failed to create order')
+      const data = res.data
+      if (res.status !== 200 && res.status !== 201) throw new Error(data.message || 'Failed to create order')
 
       const { razorpayOrderId, amount, currency, keyId, order } = data.data
 
@@ -226,23 +225,21 @@ export default function CheckoutPage() {
         order_id: razorpayOrderId,
         handler: async (response) => {
           try {
-            const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders/verify-payment`, {
-              method: 'POST',
+            const verifyRes = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders/verify-payment`, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }, {
               headers: { 
-                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${user.token}`
               },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              }),
+              validateStatus: () => true
             })
-            if (!verifyRes.ok) throw new Error('Payment verification failed')
+            if (verifyRes.status !== 200 && verifyRes.status !== 201) throw new Error('Payment verification failed')
             
             setIsOrderSuccess(true)
             clearCart()
-            router.push(`/order-success?id=${order.orderNumber}&total=${grandTotal}&addr=${encodeURIComponent(formData.address)}&paymentId=${response.razorpay_payment_id}`)
+            router.push(`/order-success?id=${order.orderNumber}&oid=${order._id}&total=${grandTotal}&addr=${encodeURIComponent(formData.address)}&paymentId=${response.razorpay_payment_id}`)
           } catch (err) {
             alert('Payment verification failed. Please contact support.')
           }
@@ -253,9 +250,9 @@ export default function CheckoutPage() {
           ondismiss: async function() {
             setLoading(false);
             try {
-              await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders/${order._id}/cancel`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${user.token}` }
+              await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders/${order._id}/cancel`, {
+                headers: { 'Authorization': `Bearer ${user.token}` },
+                validateStatus: () => true
               });
             } catch (err) {
               console.error('Failed to cancel order:', err);

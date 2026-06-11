@@ -1,5 +1,6 @@
 "use client"
 import { createContext, useContext, useState, useEffect } from 'react'
+import axios from 'axios'
 
 const AuthContext = createContext()
 
@@ -15,12 +16,13 @@ export function AuthProvider({ children }) {
         if (userInfo) {
           const parsed = JSON.parse(userInfo)
           // Validate token with backend
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
             headers: {
               Authorization: `Bearer ${parsed.token}`
-            }
+            },
+            validateStatus: () => true
           })
-          if (res.ok) {
+          if (res.status === 200) {
             setUser(parsed)
           } else {
             localStorage.removeItem('userInfo')
@@ -38,14 +40,13 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-      const data = await res.json()
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/login`, 
+        { email, password },
+        { validateStatus: () => true }
+      )
+      const data = res.data
       
-      if (!res.ok) {
+      if (res.status !== 200) {
         throw new Error(data.message || 'Login failed')
       }
 
@@ -59,14 +60,13 @@ export function AuthProvider({ children }) {
 
   const register = async (name, email, password, phone) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, phone })
-      })
-      const data = await res.json()
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`,
+        { name, email, password, phone },
+        { validateStatus: () => true }
+      )
+      const data = res.data
       
-      if (!res.ok) {
+      if (res.status !== 200 && res.status !== 201) {
         throw new Error(data.message || 'Registration failed')
       }
 

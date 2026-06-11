@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useCart } from "@/context/CartContext"
 import { Leaf, ShieldCheck, Clock, Truck, Star, ChevronLeft, ChevronRight, ShoppingBag, Sparkles, ChefHat, HeartHandshake, Phone, ShoppingCart, MapPin, Award, X, Play } from "lucide-react"
 import ProductCard from '@/components/ProductCard'
+import axios from 'axios'
 
 const FOOD_IMG = "/images/indian_roti_meal.png"
 const KITCHEN_IMG = "/images/dough_preparation.png"
@@ -78,8 +79,8 @@ export default function Home() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/videos`)
-        const data = await res.json()
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/videos`, { validateStatus: () => true })
+        const data = res.data
         if (data.success) {
           setVideos(data.data)
         }
@@ -92,8 +93,8 @@ export default function Home() {
     
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/reviews`)
-        const data = await res.json()
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/reviews`, { validateStatus: () => true })
+        const data = res.data
         if (data.success) {
           setReviews(data.data)
         }
@@ -106,8 +107,8 @@ export default function Home() {
 
     const fetchMenu = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/catalog/menu`)
-        const data = await res.json()
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/catalog/menu`, { validateStatus: () => true })
+        const data = res.data
         if (data.success && data.data) {
           const menu = data.data
           const allProducts = Object.values(menu).flat()
@@ -127,8 +128,8 @@ export default function Home() {
   const [currentCraftImageIndex, setCurrentCraftImageIndex] = useState(0)
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/v1/settings`)
-      .then(res => res.json())
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/v1/settings`, { validateStatus: () => true })
+      .then(res => res.data)
       .then(data => {
         if (data.success) {
           setSettings(data.data)
@@ -160,12 +161,8 @@ export default function Home() {
     e.preventDefault()
     setSubmittingReview(true)
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/reviews`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reviewForm)
-      })
-      const data = await res.json()
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/reviews`, reviewForm, { validateStatus: () => true })
+      const data = res.data
       if (data.success) {
         setReviews([data.data, ...reviews])
         setShowReviewModal(false)
