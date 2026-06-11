@@ -12,6 +12,7 @@ import {
   Phone,
   Loader2,
   Leaf,
+  ArrowLeft,
 } from "lucide-react";
 
 function SignupContent() {
@@ -203,16 +204,18 @@ function SignupContent() {
       <div className="w-full lg:w-1/2 h-full overflow-y-auto relative z-10 custom-scrollbar">
         <div className="min-h-full flex items-center justify-center p-6 sm:p-12 lg:p-12 xl:p-16">
           <div className="w-full max-w-md">
-            <Link
-              href="/"
-              className="inline-flex mb-6 lg:mb-8 transform hover:-translate-x-1 transition-transform"
-            >
+            <Link href="/" className="inline-flex items-center text-[#73706A] hover:text-[#114D3C] transition-colors font-bold text-sm mb-6 lg:mb-8 hover:-translate-x-1">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Link>
+            
+            <div className="mb-6 lg:mb-8">
               <img
                 src="/logo.jpeg"
                 alt="Logo"
                 className="h-10 lg:h-12 w-auto object-contain rounded-xl shadow-sm border border-[#EAE5D9]"
               />
-            </Link>
+            </div>
             <h1
               className="text-3xl lg:text-4xl font-bold text-[#114D3C] mb-2"
               style={{ fontFamily: "var(--font-playfair)" }}
