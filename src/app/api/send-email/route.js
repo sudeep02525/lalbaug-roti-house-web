@@ -1,0 +1,47 @@
+import nodemailer from 'nodemailer';
+import { NextResponse } from 'next/server';
+
+export async function POST(req) {
+  try {
+    const body = await req.json();
+    const { secret, options } = body;
+
+    // A simple secret to prevent unauthorized usage
+    const EXPECTED_SECRET = "Lalbaug-Roti-House-Email-Bypass-Secret-2026";
+    
+    if (secret !== EXPECTED_SECRET) {
+      return NextResponse.json({ success: false, message: "Unauthorized proxy request" }, { status: 401 });
+    }
+
+    // Hardcoded fallback if environment variables are not set in Vercel
+    const smtpUser = process.env.SMTP_USER || "lalbaugrotihouse@gmail.com";
+    const smtpPass = process.env.SMTP_PASS || "lwkuoxjvvwmrnegh";
+    const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
+    const smtpPort = process.env.SMTP_PORT || 587;
+
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort == 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+
+    const message = {
+      from: `"Lalbaug Roti House" <${smtpUser}>`,
+      to: options.email,
+      subject: options.subject,
+      text: options.message,
+      html: options.html,
+    };
+
+    const info = await transporter.sendMail(message);
+    
+    return NextResponse.json({ success: true, messageId: info.messageId });
+  } catch (error) {
+    console.error("Vercel proxy email error:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
