@@ -13,11 +13,16 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Unauthorized proxy request" }, { status: 401 });
     }
 
-    // Hardcoded fallback if environment variables are not set in Vercel
-    const smtpUser = process.env.SMTP_USER || "lalbaugrotihouse@gmail.com";
-    const smtpPass = process.env.SMTP_PASS || "lwkuoxjvvwmrnegh";
+    // Hardcoded fallback removed for security. Please set these in Vercel Environment Variables.
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
     const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
     const smtpPort = process.env.SMTP_PORT || 587;
+
+    if (!smtpUser || !smtpPass) {
+      console.error("Missing SMTP credentials in Vercel Environment Variables");
+      return NextResponse.json({ success: false, message: "Email configuration missing on server" }, { status: 500 });
+    }
 
     const transporter = nodemailer.createTransport({
       host: smtpHost,
