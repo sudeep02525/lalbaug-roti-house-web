@@ -27,6 +27,7 @@ export async function POST(req) {
         user: smtpUser,
         pass: smtpPass,
       },
+      family: 4, // Force IPv4 to fix ENETUNREACH error on Vercel
     });
 
     const message = {
