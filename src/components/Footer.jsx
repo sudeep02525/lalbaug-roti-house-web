@@ -60,10 +60,10 @@ export function Footer() {
               {settings?.footerDescription || 'Fresh handmade rotis, bhakari, thepla and traditional food delivered daily in Mumbai with love and care.'}
             </p>
             <div className="flex items-center gap-4">
-              <a href={settings?.instagramUrl || '#'} target="_blank" rel="noopener noreferrer" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="Instagram">
+              <a href={(settings?.instagramUrl && settings.instagramUrl !== '#') ? settings.instagramUrl : 'https://www.instagram.com/lalbaug_roti_house?igsh=em9jeDA5anMzM205'} target="_blank" rel="noopener noreferrer" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="Instagram">
                 <InstagramIcon className="w-4 h-4" />
               </a>
-              <a href={settings?.facebookUrl || '#'} target="_blank" rel="noopener noreferrer" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="Facebook">
+              <a href={(settings?.facebookUrl && settings.facebookUrl !== '#') ? settings.facebookUrl : 'https://www.facebook.com/share/1XwJ1zQMs4/'} target="_blank" rel="noopener noreferrer" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="Facebook">
                 <FacebookIcon className="w-4 h-4" />
               </a>
               <a href={`https://wa.me/${settings?.whatsappNumber || '919920688099'}`} target="_blank" rel="noopener noreferrer" className="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-[#C19B6C] hover:border-[#C19B6C] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(193,155,108,0.3)]" aria-label="WhatsApp">

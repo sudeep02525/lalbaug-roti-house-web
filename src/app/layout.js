@@ -28,6 +28,7 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata = {
+  metadataBase: new URL('https://www.lalbaugrotihouse.com'),
   title: "Lalbaug Roti House | Authentic Homemade Food Delivery",
   description: "Order fresh, authentic homemade Roti, Bhakari, Thepla, and complete meals delivered straight to your door in Mumbai. Experience the taste of home.",
   keywords: ["homemade roti", "bhakri delivery", "thepla online", "home cooked food delivery", "mumbai food delivery", "authentic maharashtrian food", "lalbaug roti house"],

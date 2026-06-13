@@ -5,6 +5,7 @@ import { useCart } from "@/context/CartContext"
 import { Leaf, ShieldCheck, Clock, Truck, Star, ChevronLeft, ChevronRight, ShoppingBag, Sparkles, ChefHat, HeartHandshake, Phone, ShoppingCart, MapPin, Award, X, Play } from "lucide-react"
 import ProductCard from '@/components/ProductCard'
 import axios from 'axios'
+import { preload } from 'react-dom'
 
 const FOOD_IMG = "/images/indian_roti_meal.png"
 const KITCHEN_IMG = "/images/dough_preparation.png"
@@ -48,6 +49,8 @@ const VideoCard = ({ video, onClick }) => {
 }
 
 export default function Home() {
+  preload('/images/hero-platter.png', { as: 'image', fetchPriority: 'high' })
+  
   const [isWheatFront, setIsWheatFront] = useState(false)
   const { addToCart } = useCart()
   const [videos, setVideos] = useState([])
@@ -253,6 +256,8 @@ export default function Home() {
             src={settings?.heroImage ? (settings.heroImage.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${settings.heroImage}` : settings.heroImage) : "/images/hero-platter.png"}
             alt="Fresh traditional food"
             className="w-full h-full object-cover scale-105 origin-right"
+            fetchPriority="high"
+            decoding="sync"
             style={{
               WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 15%, black 45%)',
               maskImage: 'linear-gradient(to right, transparent 0%, transparent 15%, black 45%)'
