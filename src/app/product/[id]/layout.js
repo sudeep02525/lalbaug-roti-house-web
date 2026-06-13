@@ -1,5 +1,5 @@
 export async function generateMetadata({ params }) {
-  const { id } = params;
+  const { id } = await params;
 
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.lalbaugrotihouse.com'}/api/v1/catalog/products/${id}`);
