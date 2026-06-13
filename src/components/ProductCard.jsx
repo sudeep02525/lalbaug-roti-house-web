@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCart } from '@/context/CartContext'
 import { ShoppingCart, Plus, Minus, Leaf } from 'lucide-react'
 import Link from 'next/link'
@@ -13,19 +13,45 @@ export const getImageUrl = (url) => {
 }
 
 export default function ProductCard({ item }) {
-  const { items, addToCart, updateQuantity } = useCart()
+  const { items, addToCart, updateQuantity, updateCartItemAddons } = useCart()
   const hasVariants = !!(item.price && item.packPrice)
   const [selectedVariant, setSelectedVariant] = useState(item.packPrice ? 'pack' : 'single')
   const [selectedAddons, setSelectedAddons] = useState([])
   const [qty, setQty] = useState(1)
   const [showAddons, setShowAddons] = useState(false)
 
-  const toggleAddon = (addon) =>
-    setSelectedAddons(prev =>
-      prev.some(a => a._id === addon._id)
-        ? prev.filter(a => a._id !== addon._id)
-        : [...prev, addon]
-    )
+  const cartItemsForProduct = items.filter(i => i.product.id === item.id)
+  const totalQtyInCart = cartItemsForProduct.reduce((sum, i) => sum + i.quantity, 0)
+
+  useEffect(() => {
+    if (cartItemsForProduct.length > 0) {
+      setSelectedAddons(cartItemsForProduct[0].addons || []);
+    } else {
+      setSelectedAddons([]);
+    }
+  }, [items]);
+
+  const updateAddonQuantity = (addon, delta) => {
+    const existing = selectedAddons.find(a => a._id === addon._id);
+    const newQty = (existing?.quantity || 1) + delta;
+    
+    let newAddons;
+    if (newQty <= 0) {
+      newAddons = selectedAddons.filter(a => a._id !== addon._id);
+    } else if (existing) {
+      newAddons = selectedAddons.map(a => a._id === addon._id ? { ...a, quantity: newQty } : a);
+    } else if (delta > 0) {
+      newAddons = [...selectedAddons, { ...addon, quantity: 1 }];
+    } else {
+      newAddons = selectedAddons;
+    }
+
+    if (cartItemsForProduct.length === 0) {
+      setSelectedAddons(newAddons);
+    } else {
+      updateCartItemAddons(cartItemsForProduct[0].cartItemId, newAddons);
+    }
+  }
 
   const handleAdd = (e) => {
     e?.preventDefault?.()
@@ -42,9 +68,6 @@ export default function ProductCard({ item }) {
     setShowAddons(false)
   }
 
-  const cartItemsForProduct = items.filter(i => i.product.id === item.id)
-  const totalQtyInCart = cartItemsForProduct.reduce((sum, i) => sum + i.quantity, 0)
-  
   const displayQty = totalQtyInCart > 0 ? totalQtyInCart : 1;
   let originalTotal = (item.price || 0) * displayQty;
   let productTotal = originalTotal;
@@ -57,6 +80,9 @@ export default function ProductCard({ item }) {
     productTotal = item.packPrice * displayQty;
     originalTotal = productTotal;
   }
+  
+  const addonsTotal = selectedAddons.reduce((sum, a) => sum + (a.price * (a.quantity || 1)), 0);
+  const displayTotalPrice = productTotal + addonsTotal;
   
   // For the stepper, we will modify the first matching cart item
   const handleIncrement = (e) => {
@@ -116,17 +142,30 @@ export default function ProductCard({ item }) {
           {showAddons && (item.addons && item.addons.length > 0) && (
             <div className="flex flex-col gap-2 mb-4 bg-[#FAF8F5] p-3 rounded-xl border border-[#EAE5D9]">
               {item.addons.map(addon => {
-                const isSelected = selectedAddons.some(a => a._id === addon._id)
+                const selectedAddon = selectedAddons.find(a => a._id === addon._id)
+                const isSelected = !!selectedAddon
+                const addonQty = selectedAddon ? (selectedAddon.quantity || 1) : 0
                 return (
-                  <label key={addon._id} className="flex items-center gap-3 text-sm cursor-pointer group">
-                    <div className={`w-4 h-4 rounded-sm border flex items-center justify-center transition-colors shrink-0 ${isSelected ? 'bg-[#114D3C] border-[#114D3C]' : 'border-[#C19B6C] bg-white group-hover:border-[#114D3C]'}`}>
-                      {isSelected && <div className="w-2 h-2 bg-white rounded-sm" />}
+                  <div key={addon._id} className="flex items-center justify-between text-sm group mb-2 last:mb-0 bg-white p-2 rounded-lg border border-[#EAE5D9]/50 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      {addon.image && <img src={getImageUrl(addon.image)} alt={addon.name} className="w-8 h-8 rounded-md object-cover border border-[#EAE5D9]" />}
+                      <div>
+                        <span className="text-[#2C3E35] text-[13px] font-medium leading-tight block" style={{ fontFamily: "var(--font-outfit)" }}>{addon.name}</span>
+                        <span className="text-[#E8A359] font-bold text-xs whitespace-nowrap">+₹{addon.price}</span>
+                      </div>
                     </div>
-                    {addon.image && <img src={getImageUrl(addon.image)} alt={addon.name} className="w-8 h-8 rounded-md object-cover border border-[#EAE5D9]" />}
-                    <span className="text-[#2C3E35] flex-1 text-[13px] font-medium leading-tight" style={{ fontFamily: "var(--font-outfit)" }}>{addon.name}</span>
-                    <span className="text-[#114D3C] font-bold text-xs whitespace-nowrap">+₹{addon.price}</span>
-                    <input type="checkbox" className="hidden" checked={isSelected} onChange={() => toggleAddon(addon)} />
-                  </label>
+                    <div className="flex items-center">
+                      {isSelected ? (
+                        <div className="flex items-center gap-1.5 bg-[#FAF8F5] px-1 py-0.5 rounded border border-[#EAE5D9] shadow-sm">
+                          <button onClick={() => updateAddonQuantity(addon, -1)} className="w-6 h-6 flex items-center justify-center rounded bg-white text-[#114D3C] font-bold text-xs hover:bg-[#EAE5D9] border border-[#EAE5D9]/50">-</button>
+                          <span className="w-3 text-center font-bold text-[#114D3C] text-xs">{addonQty}</span>
+                          <button onClick={() => updateAddonQuantity(addon, 1)} className="w-6 h-6 flex items-center justify-center rounded bg-white text-[#114D3C] font-bold text-xs hover:bg-[#EAE5D9] border border-[#EAE5D9]/50">+</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => updateAddonQuantity(addon, 1)} className="px-3 py-1.5 rounded border-2 border-[#114D3C] text-[#114D3C] text-[10px] uppercase tracking-wider font-bold hover:bg-[#114D3C] hover:text-white transition-colors">Add</button>
+                      )}
+                    </div>
+                  </div>
                 )
               })}
             </div>
@@ -135,11 +174,11 @@ export default function ProductCard({ item }) {
           <div className="flex items-center justify-between pt-3 border-t border-[#EAE5D9]/50 mt-auto min-h-[3rem]">
              <div className="flex flex-col gap-0.5" style={{ fontFamily: "var(--font-outfit)" }}>
                {item.price === null ? (
-                 <span className="text-[15px] font-bold text-[#114D3C]">₹{productTotal} / {item.packQty * displayQty} Pcs</span>
+                 <span className="text-[15px] font-bold text-[#114D3C]">₹{displayTotalPrice} / {item.packQty * displayQty} Pcs</span>
                ) : (
                  <>
                    <div className="flex items-baseline gap-1">
-                     <span className="text-[16px] font-bold text-[#114D3C] tracking-tight">₹{productTotal}</span>
+                     <span className="text-[16px] font-bold text-[#114D3C] tracking-tight">₹{displayTotalPrice}</span>
                      <span className="text-[12px] font-medium text-[#73706A]">/ {displayQty} Pc{displayQty > 1 ? 's' : ''}</span>
                    </div>
                    {item.packPrice && (

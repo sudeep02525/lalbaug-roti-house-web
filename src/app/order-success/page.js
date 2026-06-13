@@ -59,6 +59,14 @@ function SuccessContent() {
               </div>
             </div>
           </div>
+
+          {orderDetails?.deliveryOtp && (
+            <div className="bg-[var(--accent)]/10 border-b border-[var(--border)] p-6 text-center">
+              <p className="text-sm text-[var(--muted-foreground)] mb-1 uppercase tracking-wider font-bold">Delivery OTP</p>
+              <div className="text-4xl tracking-[0.2em] font-extrabold text-[var(--accent)]">{orderDetails.deliveryOtp}</div>
+              <p className="text-xs text-[var(--muted-foreground)] mt-2 max-w-xs mx-auto">Please share this 4-digit code with the delivery executive to receive your order.</p>
+            </div>
+          )}
           
           <div className="p-6 md:p-8 space-y-8">
             <div className="flex items-start gap-4">

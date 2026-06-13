@@ -27,12 +27,20 @@ export default function ProductDetailsPage() {
   const [activeTab, setActiveTab] = useState('description')
   const [initializedFromCart, setInitializedFromCart] = useState(false)
 
-  const toggleAddon = (addon) => {
-    setSelectedAddons(prev =>
-      prev.some(a => a._id === addon._id)
-        ? prev.filter(a => a._id !== addon._id)
-        : [...prev, addon]
-    )
+  const updateAddonQuantity = (addon, delta) => {
+    setSelectedAddons(prev => {
+      const existing = prev.find(a => a._id === addon._id);
+      if (existing) {
+        const newQty = (existing.quantity || 1) + delta;
+        if (newQty <= 0) {
+          return prev.filter(a => a._id !== addon._id);
+        }
+        return prev.map(a => a._id === addon._id ? { ...a, quantity: newQty } : a);
+      } else if (delta > 0) {
+        return [...prev, { ...addon, quantity: 1 }];
+      }
+      return prev;
+    });
   }
 
   // Variant parsing
@@ -57,7 +65,7 @@ export default function ProductDetailsPage() {
   }
 
   const discountAmt = originalTotal - productTotal
-  const addonsTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0) * quantity
+  const addonsTotal = selectedAddons.reduce((sum, a) => sum + (a.price * (a.quantity || 1)), 0)
   const totalPrice = productTotal + addonsTotal
 
   useEffect(() => {
@@ -311,20 +319,43 @@ export default function ProductDetailsPage() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {product.addons.map(addon => {
-                    const isSelected = selectedAddons.some(a => a._id === addon._id)
+                    const selectedAddon = selectedAddons.find(a => a._id === addon._id)
+                    const isSelected = !!selectedAddon
+                    const addonQty = selectedAddon ? (selectedAddon.quantity || 1) : 0
                     return (
-                      <label 
+                      <div 
                         key={addon._id} 
-                        className={`flex items-center gap-4 p-3 rounded-2xl border-2 cursor-pointer transition-all ${isSelected ? 'border-[#14452F] bg-[#14452F]/5' : 'border-[#EAE5D9] bg-white hover:border-[#14452F]/30 hover:bg-[#FAF8F5]'}`}
+                        className={`flex items-center justify-between gap-3 p-3 rounded-2xl border-2 transition-all ${isSelected ? 'border-[#14452F] bg-[#14452F]/5' : 'border-[#EAE5D9] bg-white hover:border-[#14452F]/30 hover:bg-[#FAF8F5]'}`}
                       >
-                        <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors shrink-0 ${isSelected ? 'bg-[#14452F] border-[#14452F]' : 'border-2 border-[#C19B6C] bg-white'}`}>
-                          {isSelected && <div className="w-2.5 h-2.5 bg-white rounded-sm" />}
+                        <div className="flex items-center gap-3">
+                          {addon.image && <img src={getImageUrl(addon.image)} alt={addon.name} className="w-10 h-10 rounded-xl object-cover border border-[#EAE5D9]" />}
+                          <div>
+                            <span className="text-[#2C3E35] font-medium block" style={{ fontFamily: "var(--font-outfit)" }}>{addon.name}</span>
+                            <span className="text-[#E8A359] font-bold text-sm">+₹{addon.price}</span>
+                          </div>
                         </div>
-                        {addon.image && <img src={getImageUrl(addon.image)} alt={addon.name} className="w-10 h-10 rounded-xl object-cover border border-[#EAE5D9]" />}
-                        <span className="text-[#2C3E35] flex-1 font-medium" style={{ fontFamily: "var(--font-outfit)" }}>{addon.name}</span>
-                        <span className="text-[#E8A359] font-bold">+₹{addon.price}</span>
-                        <input type="checkbox" className="hidden" checked={isSelected} onChange={() => toggleAddon(addon)} />
-                      </label>
+                        
+                        {isSelected ? (
+                          <div className="flex items-center gap-2 bg-white p-1 rounded-lg border border-[#14452F]/20">
+                            <button 
+                              onClick={() => updateAddonQuantity(addon, -1)}
+                              className="w-8 h-8 flex items-center justify-center rounded-md bg-[#FAF8F5] text-[#14452F] hover:bg-[#14452F]/10 font-bold"
+                            >-</button>
+                            <span className="w-4 text-center font-bold text-[#14452F] text-sm">{addonQty}</span>
+                            <button 
+                              onClick={() => updateAddonQuantity(addon, 1)}
+                              className="w-8 h-8 flex items-center justify-center rounded-md bg-[#FAF8F5] text-[#14452F] hover:bg-[#14452F]/10 font-bold"
+                            >+</button>
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={() => updateAddonQuantity(addon, 1)}
+                            className="px-4 py-1.5 rounded-lg border-2 border-[#14452F] text-[#14452F] font-bold text-xs hover:bg-[#14452F] hover:text-white transition-colors uppercase tracking-wider"
+                          >
+                            Add
+                          </button>
+                        )}
+                      </div>
                     )
                   })}
                 </div>

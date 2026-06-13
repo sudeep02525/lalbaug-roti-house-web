@@ -114,8 +114,8 @@ export default function CartPage() {
               
               // Base price calculation for UI comparison
               const basePrice = item.variant ? item.variant.price : item.product.price
-              const addonsPrice = item.addons.reduce((sum, a) => sum + a.price, 0)
-              const originalTotal = (basePrice + addonsPrice) * item.quantity
+              const addonsPrice = (item.addons || []).reduce((sum, a) => sum + (a.price * (a.quantity || 1)), 0)
+              const originalTotal = (basePrice * item.quantity) + addonsPrice
 
               return (
                 <div key={item.cartItemId} className="bg-white rounded-3xl border border-[#EAE5D9] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] group">
@@ -141,9 +141,9 @@ export default function CartPage() {
                           )}
                           {item.addons?.length > 0 && (
                             <div className="mt-2 flex flex-wrap gap-1">
-                              {item.addons.map(a => (
-                                <span key={a.id} className="inline-block text-[10px] font-bold bg-[#FAF8F5] border border-[#EAE5D9] text-[#73706A] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                  + {a.name}
+                              {item.addons.map((a, idx) => (
+                                <span key={a._id || a.id || idx} className="inline-block text-[10px] font-bold bg-[#FAF8F5] border border-[#EAE5D9] text-[#73706A] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                  + {a.name} {a.quantity && a.quantity > 1 ? `x${a.quantity}` : ''}
                                 </span>
                               ))}
                             </div>
@@ -209,8 +209,8 @@ export default function CartPage() {
                 {(() => {
                   const originalSubtotal = items.reduce((sum, item) => {
                     const basePrice = item.variant ? item.variant.price : item.product.price;
-                    const addonsPrice = (item.addons || []).reduce((addSum, add) => addSum + add.price, 0);
-                    return sum + ((basePrice + addonsPrice) * item.quantity);
+                    const addonsPrice = (item.addons || []).reduce((addSum, add) => addSum + (add.price * (add.quantity || 1)), 0);
+                    return sum + (basePrice * item.quantity) + addonsPrice;
                   }, 0);
                   const totalDiscount = originalSubtotal - subtotal;
                   

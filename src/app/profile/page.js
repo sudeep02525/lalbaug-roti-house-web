@@ -476,6 +476,18 @@ export default function ProfilePage() {
                         </div>
                       </div>
 
+                      {order.deliveryOtp && !['DELIVERED', 'FAILED', 'CANCELLED'].includes(order.orderStatus) && (
+                        <div className="bg-[#FAF5E9] border border-[#E8E1D5] rounded-2xl p-4 mb-6 flex items-center justify-between shadow-sm">
+                          <div>
+                            <p className="text-xs font-bold text-[#8B5E3C] uppercase tracking-widest mb-0.5">Delivery OTP</p>
+                            <p className="text-[#1A4D2E] text-xs font-medium">Share this code with your delivery partner</p>
+                          </div>
+                          <div className="bg-white border-2 border-[#8B5E3C] px-4 py-2 rounded-xl text-xl tracking-[0.2em] font-extrabold text-[#1A4D2E]">
+                            {order.deliveryOtp}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Delivery Boy Info */}
                       {order.assignedDeliveryBoy && (
                         <div className="bg-[#FAF5E9] border border-[#E8E1D5] rounded-2xl p-4 mb-6 flex items-center justify-between">

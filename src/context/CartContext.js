@@ -110,7 +110,7 @@ export function CartProvider({ children }) {
     setItems((prevItems) => {
       // Create a unique hash for the item based on ID, variant, and addons
       const addonIds = addons
-        .map((a) => a.id)
+        .map((a) => `${a.id || a._id}-${a.quantity || 1}`)
         .sort()
         .join(",");
       const cartItemId = `${product.id}-${variant?.id || "base"}-${addonIds}`;
@@ -152,6 +152,35 @@ export function CartProvider({ children }) {
     );
   };
 
+  const updateCartItemAddons = (cartItemId, newAddons) => {
+    setItems((prevItems) => {
+      const existingItemIndex = prevItems.findIndex((item) => item.cartItemId === cartItemId);
+      if (existingItemIndex === -1) return prevItems;
+
+      const item = prevItems[existingItemIndex];
+      const addonIds = newAddons
+        .map((a) => `${a.id || a._id}-${a.quantity || 1}`)
+        .sort()
+        .join(",");
+      const newCartItemId = `${item.product.id}-${item.variant?.id || "base"}-${addonIds}`;
+
+      const identicalItemIndex = prevItems.findIndex((i) => i.cartItemId === newCartItemId && i.cartItemId !== cartItemId);
+      
+      const newItems = [...prevItems];
+      if (identicalItemIndex >= 0) {
+        newItems[identicalItemIndex].quantity += item.quantity;
+        newItems.splice(existingItemIndex, 1);
+      } else {
+        newItems[existingItemIndex] = {
+          ...item,
+          cartItemId: newCartItemId,
+          addons: newAddons,
+        };
+      }
+      return newItems;
+    });
+  };
+
   const removeFromCart = (cartItemId) => {
     setItems((prevItems) =>
       prevItems.filter((item) => item.cartItemId !== cartItemId),
@@ -164,11 +193,10 @@ export function CartProvider({ children }) {
 
   const calculateItemTotal = (item) => {
     let itemPrice = item.variant ? item.variant.price : item.product.price;
-    let addonsPrice = item.addons.reduce(
-      (addSum, add) => addSum + add.price,
+    let totalAddons = item.addons.reduce(
+      (addSum, add) => addSum + (add.price * (add.quantity || 1)),
       0,
     );
-    let totalAddons = addonsPrice * item.quantity;
 
     let productTotal = 0;
     const isSingle =
@@ -198,6 +226,7 @@ export function CartProvider({ children }) {
         items,
         addToCart,
         updateQuantity,
+        updateCartItemAddons,
         removeFromCart,
         clearCart,
         totalItems,

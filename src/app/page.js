@@ -128,7 +128,7 @@ export default function Home() {
   const [currentCraftImageIndex, setCurrentCraftImageIndex] = useState(0)
 
   useEffect(() => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/v1/settings`, { validateStatus: () => true })
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.lalbaugrotihouse.com'}/api/v1/settings`, { validateStatus: () => true })
       .then(res => res.data)
       .then(data => {
         if (data.success) {
@@ -271,9 +271,9 @@ export default function Home() {
               {/* Front Image (First uploaded image) */}
               <div className={`absolute inset-0 rounded-[2rem] overflow-hidden transition-all duration-1000 ease-in-out ${isWheatFront ? 'z-20 shadow-2xl scale-100 rotate-0' : 'z-10 shadow-lg -rotate-3 scale-105'}`}>
                 {settings?.craftImages && settings.craftImages.length > 0 ? (
-                  <img src={settings.craftImages[0].startsWith('/uploads') || settings.craftImages[0].startsWith('/images') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${settings.craftImages[0]}` : settings.craftImages[0]} alt="Our Craft" className={`w-full h-full object-cover transition-all duration-1000 ${isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
+                  <img src={settings.craftImages[0].startsWith('/uploads') || settings.craftImages[0].startsWith('/images') ? `${process.env.NEXT_PUBLIC_API_URL || 'https://api.lalbaugrotihouse.com'}${settings.craftImages[0]}` : settings.craftImages[0]} alt="Our Craft" className={`w-full h-full object-cover transition-all duration-1000 ${isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
                 ) : (
-                  <img src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/images/wheat_background.png`} alt="Our Craft" className={`w-full h-full object-cover transition-all duration-1000 ${isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
+                  <img src={`${process.env.NEXT_PUBLIC_API_URL || 'https://api.lalbaugrotihouse.com'}/images/wheat_background.png`} alt="Our Craft" className={`w-full h-full object-cover transition-all duration-1000 ${isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
                 )}
                 <div className={`absolute inset-0 bg-[#114D3C]/10 mix-blend-multiply transition-opacity duration-1000 pointer-events-none ${isWheatFront ? 'opacity-0' : 'opacity-100'}`}></div>
               </div>
@@ -282,7 +282,7 @@ export default function Home() {
               <div className={`absolute inset-0 rounded-[2rem] overflow-hidden transition-all duration-1000 ease-in-out ${!isWheatFront ? 'z-20 shadow-2xl scale-100 rotate-0' : 'z-10 shadow-lg -rotate-3 scale-105'}`}>
                 {settings?.craftImages && settings.craftImages.length > 1 ? (
                   settings.craftImages.slice(1).map((img, idx) => {
-                    const imgUrl = img.startsWith('/uploads') || img.startsWith('/images') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${img}` : img;
+                    const imgUrl = img.startsWith('/uploads') || img.startsWith('/images') ? `${process.env.NEXT_PUBLIC_API_URL || 'https://api.lalbaugrotihouse.com'}${img}` : img;
                     return (
                       <img 
                         key={idx} 
@@ -293,7 +293,7 @@ export default function Home() {
                     );
                   })
                 ) : (
-                  <img src={settings?.craftImage ? (settings.craftImage.startsWith('/uploads') || settings.craftImage.startsWith('/images') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${settings.craftImage}` : settings.craftImage) : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${KITCHEN_IMG}`} alt="Our Kitchen" className={`w-full h-full object-cover transition-all duration-1000 ${!isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
+                  <img src={settings?.craftImage ? (settings.craftImage.startsWith('/uploads') || settings.craftImage.startsWith('/images') ? `${process.env.NEXT_PUBLIC_API_URL || 'https://api.lalbaugrotihouse.com'}${settings.craftImage}` : settings.craftImage) : `${process.env.NEXT_PUBLIC_API_URL || 'https://api.lalbaugrotihouse.com'}${KITCHEN_IMG}`} alt="Our Kitchen" className={`w-full h-full object-cover transition-all duration-1000 ${!isWheatFront ? 'opacity-100' : 'opacity-90'}`} />
                 )}
                 <div className={`absolute inset-0 bg-[#114D3C]/10 mix-blend-multiply transition-opacity duration-1000 pointer-events-none ${!isWheatFront ? 'opacity-0' : 'opacity-100'}`}></div>
               </div>

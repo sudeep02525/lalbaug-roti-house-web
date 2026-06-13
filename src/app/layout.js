@@ -28,8 +28,41 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata = {
-  title: "Lalbaug Roti House",
-  description: "Fresh Handmade Roti, Bhakari, Thepla & Delicious Food Delivered Daily.",
+  title: "Lalbaug Roti House | Authentic Homemade Food Delivery",
+  description: "Order fresh, authentic homemade Roti, Bhakari, Thepla, and complete meals delivered straight to your door in Mumbai. Experience the taste of home.",
+  keywords: ["homemade roti", "bhakri delivery", "thepla online", "home cooked food delivery", "mumbai food delivery", "authentic maharashtrian food", "lalbaug roti house"],
+  openGraph: {
+    title: 'Lalbaug Roti House | Authentic Homemade Food',
+    description: 'Fresh Handmade Roti, Bhakari, Thepla & Delicious Food Delivered Daily.',
+    url: 'https://www.lalbaugrotihouse.com',
+    siteName: 'Lalbaug Roti House',
+    images: [
+      {
+        url: '/logo.jpeg',
+        width: 800,
+        height: 600,
+      },
+    ],
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lalbaug Roti House | Authentic Homemade Food',
+    description: 'Fresh Handmade Roti, Bhakari, Thepla & Delicious Food Delivered Daily.',
+    images: ['/logo.jpeg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({ children }) {
