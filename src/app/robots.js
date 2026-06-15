@@ -3,7 +3,7 @@ export default function robots() {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin', '/private/'],
+      disallow: ['/admin', '/private/', '/checkout', '/profile', '/order-success', '/orders'],
     },
     sitemap: 'https://www.lalbaugrotihouse.com/sitemap.xml',
   }

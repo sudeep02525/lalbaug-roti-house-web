@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import LocalBusinessSchema from "@/components/seo/LocalBusinessSchema";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,11 +30,14 @@ const greatVibes = Great_Vibes({
 
 export const metadata = {
   metadataBase: new URL('https://www.lalbaugrotihouse.com'),
-  title: "Lalbaug Roti House | Authentic Homemade Food Delivery",
-  description: "Order fresh, authentic homemade Roti, Bhakari, Thepla, and complete meals delivered straight to your door in Mumbai. Experience the taste of home.",
-  keywords: ["homemade roti", "bhakri delivery", "thepla online", "home cooked food delivery", "mumbai food delivery", "authentic maharashtrian food", "lalbaug roti house"],
+  title: "Lalbaug Roti House | Authentic Fresh Food Delivery",
+  description: "Order fresh, authentic handmade Roti, Bhakari, Thepla, and complete meals delivered straight to your door in Mumbai. Experience the taste of tradition.",
+  keywords: ["fresh handmade roti", "bhakri delivery", "thepla online", "fresh food delivery", "mumbai food delivery", "authentic traditional food", "lalbaug roti house", "veg thali", "tiffin service dadar", "pure veg restaurant mumbai"],
+  alternates: {
+    canonical: 'https://www.lalbaugrotihouse.com',
+  },
   openGraph: {
-    title: 'Lalbaug Roti House | Authentic Homemade Food',
+    title: 'Lalbaug Roti House | Authentic Fresh Food',
     description: 'Fresh Handmade Roti, Bhakari, Thepla & Delicious Food Delivered Daily.',
     url: 'https://www.lalbaugrotihouse.com',
     siteName: 'Lalbaug Roti House',
@@ -42,6 +46,7 @@ export const metadata = {
         url: '/logo.jpeg',
         width: 800,
         height: 600,
+        alt: 'Lalbaug Roti House Logo',
       },
     ],
     locale: 'en_IN',
@@ -49,7 +54,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Lalbaug Roti House | Authentic Homemade Food',
+    title: 'Lalbaug Roti House | Authentic Fresh Food',
     description: 'Fresh Handmade Roti, Bhakari, Thepla & Delicious Food Delivered Daily.',
     images: ['/logo.jpeg'],
   },
@@ -70,6 +75,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={`${inter.variable} ${playfair.variable} ${outfit.variable} ${greatVibes.variable} font-sans antialiased min-h-screen flex flex-col bg-[var(--background)]`}>
+        <LocalBusinessSchema />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <AuthProvider>
             <CartProvider>

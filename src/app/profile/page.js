@@ -2,30 +2,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
-import { User, Phone, MapPin, Package, Clock, ShieldCheck, Loader2, ChevronRight, LogOut, CheckCircle2, Plus, Edit2, Trash2, X, ChevronLeft } from 'lucide-react'
+import { Loader2, ChevronLeft, LogOut, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
-import { MapPicker } from '@/components/MapPicker'
 import axios from 'axios'
 
-// Same floating input component used in checkout
-const FloatingInput = ({ label, value, onChange, placeholder, type = 'text', required = false }) => (
-  <div className="relative group">
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      required={required}
-      className="peer w-full bg-[#FDFBF7] border-b-2 border-[#E8E1D5] rounded-t-xl px-5 pt-7 pb-3 text-[#1A4D2E] font-medium focus:outline-none focus:border-[#8B5E3C] focus:bg-[#FAF5E9] transition-all shadow-sm"
-      placeholder=" "
-    />
-    <label 
-      className="absolute text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C]" 
-      style={{ fontFamily: "var(--font-outfit)" }}
-    >
-      {label} {required && '*'}
-    </label>
-  </div>
-)
+import ProfileHeader from '@/components/profile/ProfileHeader'
+import OrderHistory from '@/components/profile/OrderHistory'
+import AddressManager from '@/components/profile/AddressManager'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -148,23 +131,30 @@ export default function ProfilePage() {
     saveAddressesToStorage(newAddrs)
   }
 
-  const handleLocationSelect = (lat, lng) => {
-    setAddressForm(prev => ({ ...prev, lat, lng }))
+  const handleLocationSelect = (loc) => {
+    setAddressForm(prev => ({ ...prev, lat: loc.lat, lng: loc.lng }))
     setLocationError('')
   }
 
   const handleSaveAddress = () => {
-    if (!addressForm.lat || !addressForm.lng) return setLocationError("Please pin your location on the map.")
-    if (!addressForm.name || !addressForm.mobile || !addressForm.address) return alert("Please fill all required details (Name, Mobile, Address).")
-    
+    if (!addressForm.name || !addressForm.mobile || !addressForm.address) {
+      return alert("Please fill name, mobile, and complete address.")
+    }
+    if (!addressForm.lat || !addressForm.lng) {
+      setLocationError("Please select a location on the map.")
+      return
+    }
+
     const newAddrs = [...savedAddresses]
     if (editingIndex !== null) {
-      newAddrs[editingIndex] = { ...addressForm, isDefault: newAddrs[editingIndex].isDefault }
+      newAddrs[editingIndex] = addressForm
     } else {
-      const isDefault = newAddrs.length === 0
-      newAddrs.push({ ...addressForm, isDefault })
+      newAddrs.push({
+        ...addressForm,
+        isDefault: newAddrs.length === 0
+      })
     }
-    
+
     saveAddressesToStorage(newAddrs)
     setIsModalOpen(false)
   }
@@ -177,18 +167,6 @@ export default function ProfilePage() {
       </div>
     </div>
   )
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'CONFIRMED': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'PREPARING': return 'bg-purple-100 text-purple-800 border-purple-200'
-      case 'OUT_FOR_DELIVERY': return 'bg-orange-100 text-orange-800 border-orange-200'
-      case 'DELIVERED': return 'bg-green-100 text-green-800 border-green-200'
-      case 'CANCELLED': return 'bg-red-100 text-red-800 border-red-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
 
   return (
     <div className="min-h-screen bg-[#FAF5E9] pb-24 font-outfit selection:bg-[#8B5E3C] selection:text-white">
@@ -219,88 +197,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Address Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1A4D2E]/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-          <div className="bg-[#FDFBF7] rounded-[2.5rem] shadow-2xl w-full max-w-5xl overflow-hidden border border-[#E8E1D5] my-8 relative">
-            <div className="flex items-center justify-between p-6 lg:p-8 border-b border-[#E8E1D5]">
-              <h2 className="text-3xl font-bold text-[#1A4D2E] font-playfair">{editingIndex !== null ? 'Edit Address' : 'Add New Address'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-[#FAF5E9] rounded-full transition-colors text-[#8B5E3C]">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <div className="p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-              {/* Map Column */}
-              <div className="space-y-4">
-                <div className="h-[300px] lg:h-[450px] w-full rounded-[2rem] overflow-hidden border border-[#E8E1D5] shadow-sm relative">
-                  <MapPicker 
-                    error={locationError} 
-                    onLocationSelect={handleLocationSelect} 
-                    initialPosition={addressForm.lat && addressForm.lng ? [addressForm.lat, addressForm.lng] : null} 
-                  />
-                </div>
-                {locationError && (
-                  <div className="p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5 text-red-600" />
-                    <p className="text-red-700 text-sm font-medium">{locationError}</p>
-                  </div>
-                )}
-                <p className="text-sm text-[#8B5E3C] font-medium"><MapPin className="w-4 h-4 inline mr-1" /> Pin your exact location on the map.</p>
-              </div>
-
-              {/* Form Column */}
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <FloatingInput 
-                    label="Full Name" 
-                    value={addressForm.name} 
-                    onChange={e => setAddressForm(f => ({ ...f, name: e.target.value }))} 
-                    required 
-                  />
-                  <FloatingInput 
-                    label="Mobile Number" 
-                    value={addressForm.mobile} 
-                    onChange={e => setAddressForm(f => ({ ...f, mobile: e.target.value }))} 
-                    type="tel"
-                    required 
-                  />
-                </div>
-                
-                <FloatingInput 
-                  label="Complete Address (Flat, Building, Street)" 
-                  value={addressForm.address} 
-                  onChange={e => setAddressForm(f => ({ ...f, address: e.target.value }))} 
-                  required 
-                />
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <FloatingInput 
-                    label="Landmark (Optional)" 
-                    value={addressForm.landmark || ''} 
-                    onChange={e => setAddressForm(f => ({ ...f, landmark: e.target.value }))} 
-                  />
-                  <FloatingInput 
-                    label="Delivery Notes (Optional)" 
-                    value={addressForm.notes || ''} 
-                    onChange={e => setAddressForm(f => ({ ...f, notes: e.target.value }))} 
-                  />
-                </div>
-
-                <div className="pt-6 border-t border-[#E8E1D5] mt-auto">
-                  <button
-                    onClick={handleSaveAddress}
-                    className="w-full py-5 bg-[#8B5E3C] text-white rounded-2xl font-bold text-lg hover:bg-[#734A2E] transition-all shadow-[0_8px_25px_rgba(139,94,60,0.25)] hover:-translate-y-1"
-                  >
-                    Save Address
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="container max-w-7xl mx-auto px-4 lg:px-8 pt-24 lg:pt-0">
         
         {/* Header */}
@@ -320,254 +216,29 @@ export default function ProfilePage() {
           
           {/* Left Column: Profile Card & Saved Address */}
           <div className="lg:col-span-4 space-y-8">
-            
-            {/* Personal Details */}
-            <div className="bg-[#FDFBF7] rounded-[2.5rem] p-8 shadow-sm border border-[#E8E1D5] relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#8B5E3C]/5 rounded-full blur-2xl pointer-events-none"></div>
-              
-              <div className="flex items-center gap-4 mb-8 relative z-10">
-                <div className="w-16 h-16 rounded-2xl bg-[#1A4D2E] text-white flex items-center justify-center font-playfair text-3xl font-bold shadow-inner">
-                  {user.name.charAt(0)}
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-[#1A4D2E] font-playfair">{user.name}</h3>
-                </div>
-              </div>
-
-              <div className="space-y-6 relative z-10">
-                <div className="flex items-center gap-4 pb-4 border-b border-[#E8E1D5]">
-                  <div className="w-10 h-10 rounded-xl bg-[#FAF5E9] flex items-center justify-center shrink-0 border border-[#E8E1D5]">
-                    <Phone className="w-5 h-5 text-[#1A4D2E]" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#8B5E3C] uppercase tracking-widest font-bold mb-1">Phone Number</p>
-                    <p className="font-bold text-[#1A4D2E] text-lg">{user.phone}</p>
-                  </div>
-                </div>
-                
-                {user.email && (
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-[#FAF5E9] flex items-center justify-center shrink-0 border border-[#E8E1D5]">
-                      <User className="w-5 h-5 text-[#1A4D2E]" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-[#8B5E3C] uppercase tracking-widest font-bold mb-1">Email</p>
-                      <p className="font-bold text-[#1A4D2E]">{user.email}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Saved Addresses Manager */}
-            <div className="bg-[#FDFBF7] rounded-[2.5rem] p-8 shadow-sm border border-[#E8E1D5]">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-[#1A4D2E] font-playfair flex items-center gap-3">
-                  <MapPin className="w-6 h-6 text-[#8B5E3C]" /> Addresses
-                </h3>
-                <span className="text-[#8B5E3C] font-bold text-sm bg-[#FAF5E9] px-3 py-1 rounded-full border border-[#E8E1D5]">
-                  {savedAddresses.length}/5
-                </span>
-              </div>
-              
-              <div className="space-y-4">
-                {savedAddresses.length > 0 ? (
-                  savedAddresses.map((addr, index) => (
-                    <div key={index} className={`p-5 rounded-2xl border transition-all ${addr.isDefault ? 'bg-[#FAF5E9] border-[#8B5E3C]/30 shadow-sm' : 'bg-white border-[#E8E1D5]'}`}>
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          {addr.isDefault && <CheckCircle2 className="w-4 h-4 text-[#8B5E3C]" />}
-                          <p className="font-bold text-[#1A4D2E] text-lg">{addr.name}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => handleOpenEditModal(index)} className="p-1.5 text-[#8B5E3C] hover:bg-[#E8E1D5]/50 rounded-lg transition-colors" title="Edit">
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => handleDeleteAddress(index)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <p className="text-[#8B5E3C] font-medium text-sm mb-1">{addr.mobile}</p>
-                      <p className="text-[#1A4D2E]/70 text-sm leading-relaxed mb-3 break-words">
-                        {addr.address}
-                        {addr.landmark && <><br/>Landmark: {addr.landmark}</>}
-                      </p>
-
-                      {!addr.isDefault && (
-                        <button 
-                          onClick={() => handleSetDefault(index)}
-                          className="text-xs font-bold text-[#8B5E3C] uppercase tracking-widest hover:text-[#1A4D2E] transition-colors"
-                        >
-                          Set as Default
-                        </button>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-6 bg-[#FAF5E9] rounded-2xl border border-dashed border-[#E8E1D5]">
-                    <p className="text-[#8B5E3C] font-medium">No addresses saved.</p>
-                  </div>
-                )}
-
-                {savedAddresses.length < 5 && (
-                  <button 
-                    onClick={handleOpenAddModal}
-                    className="w-full flex items-center justify-center gap-2 py-4 mt-2 border-2 border-dashed border-[#8B5E3C]/30 text-[#8B5E3C] font-bold rounded-2xl hover:bg-[#FAF5E9] hover:border-[#8B5E3C]/60 transition-all uppercase tracking-widest text-sm"
-                  >
-                    <Plus className="w-5 h-5" /> Add New Address
-                  </button>
-                )}
-              </div>
-            </div>
-
+            <ProfileHeader user={user} />
+            <AddressManager 
+              savedAddresses={savedAddresses}
+              handleOpenEditModal={handleOpenEditModal}
+              handleDeleteAddress={handleDeleteAddress}
+              handleSetDefault={handleSetDefault}
+              handleOpenAddModal={handleOpenAddModal}
+              isModalOpen={isModalOpen}
+              setIsModalOpen={setIsModalOpen}
+              editingIndex={editingIndex}
+              addressForm={addressForm}
+              setAddressForm={setAddressForm}
+              locationError={locationError}
+              handleLocationSelect={handleLocationSelect}
+              handleSaveAddress={handleSaveAddress}
+            />
           </div>
 
           {/* Right Column: Order History */}
           <div className="lg:col-span-8">
-            <div className="bg-[#FDFBF7] rounded-[2.5rem] p-8 lg:p-10 shadow-sm border border-[#E8E1D5] min-h-[600px]">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold text-[#1A4D2E] font-playfair flex items-center gap-3">
-                  <Package className="w-7 h-7 text-[#8B5E3C]" /> Order History
-                </h2>
-                <span className="bg-[#FAF5E9] text-[#8B5E3C] font-bold px-4 py-2 rounded-xl text-sm border border-[#E8E1D5]">
-                  {orders.length} {orders.length === 1 ? 'Order' : 'Orders'}
-                </span>
-              </div>
-
-              {loadingOrders ? (
-                <div className="flex flex-col items-center justify-center py-20 text-[#8B5E3C]">
-                  <Loader2 className="w-8 h-8 animate-spin mb-4" />
-                  <p className="font-bold uppercase tracking-widest text-sm">Fetching your orders...</p>
-                </div>
-              ) : orders.length === 0 ? (
-                <div className="text-center py-20">
-                  <div className="w-24 h-24 mx-auto bg-[#FAF5E9] rounded-full flex items-center justify-center mb-6 border border-[#E8E1D5]">
-                    <Package className="w-10 h-10 text-[#8B5E3C]/50" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-[#1A4D2E] font-playfair mb-2">No orders yet</h3>
-                  <p className="text-[#8B5E3C] mb-8">Looks like you haven't placed any orders with us.</p>
-                  <Link 
-                    href="/menu" 
-                    className="inline-flex items-center justify-center gap-2 bg-[#8B5E3C] text-white px-8 py-4 rounded-full font-bold hover:bg-[#734A2E] transition-all shadow-[0_8px_25px_rgba(139,94,60,0.25)] hover:-translate-y-1"
-                  >
-                    Start Ordering <ChevronRight className="w-5 h-5" />
-                  </Link>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {orders.map((order) => (
-                    <div key={order._id} className="bg-white border border-[#E8E1D5] rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow group">
-                      
-                      {/* Order Header */}
-                      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-6 border-b border-[#E8E1D5]/50">
-                        <div>
-                          <p className="text-xs font-bold text-[#8B5E3C] uppercase tracking-widest mb-1">Order #{order.orderNumber}</p>
-                          <p className="text-[#1A4D2E]/70 flex items-center gap-2 text-sm font-medium">
-                            <Clock className="w-4 h-4" /> 
-                            {new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border ${getStatusColor(order.orderStatus)}`}>
-                            {order.orderStatus.replace(/_/g, ' ')}
-                          </span>
-                        </div>
-                      </div>
-
-                      {order.deliveryOtp && !['DELIVERED', 'FAILED', 'CANCELLED'].includes(order.orderStatus) && (
-                        <div className="bg-[#FAF5E9] border border-[#E8E1D5] rounded-2xl p-4 mb-6 flex items-center justify-between shadow-sm">
-                          <div>
-                            <p className="text-xs font-bold text-[#8B5E3C] uppercase tracking-widest mb-0.5">Delivery OTP</p>
-                            <p className="text-[#1A4D2E] text-xs font-medium">Share this code with your delivery partner</p>
-                          </div>
-                          <div className="bg-white border-2 border-[#8B5E3C] px-4 py-2 rounded-xl text-xl tracking-[0.2em] font-extrabold text-[#1A4D2E]">
-                            {order.deliveryOtp}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Delivery Boy Info */}
-                      {order.assignedDeliveryBoy && (
-                        <div className="bg-[#FAF5E9] border border-[#E8E1D5] rounded-2xl p-4 mb-6 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-[#1A4D2E]/10 rounded-full flex items-center justify-center text-[#1A4D2E]">
-                              <User className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <p className="text-xs font-bold text-[#8B5E3C] uppercase tracking-widest mb-0.5">Assigned Delivery Partner</p>
-                              <p className="font-bold text-[#1A4D2E]">{order.assignedDeliveryBoy.name}</p>
-                            </div>
-                          </div>
-                          {order.assignedDeliveryBoy.phone && (
-                            <a 
-                              href={`tel:${order.assignedDeliveryBoy.phone}`}
-                              className="w-10 h-10 bg-[#1A4D2E] text-white rounded-full flex items-center justify-center hover:bg-[#11331e] shadow-md transition-colors shrink-0"
-                              title="Call Delivery Partner"
-                            >
-                              <Phone className="w-4 h-4" />
-                            </a>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Order Items */}
-                      <div className="space-y-4 mb-6">
-                        {order.items.map((item, idx) => (
-                          <div key={idx} className="flex justify-between items-start">
-                            <div>
-                              <p className="font-bold text-[#1A4D2E] text-lg font-playfair">
-                                <span className="text-[#8B5E3C] mr-2">{item.quantity}x</span> {item.name}
-                              </p>
-                              {item.addons?.length > 0 && (
-                                <p className="text-[#1A4D2E]/60 text-sm ml-7">
-                                  + {item.addons.map(a => a.name).join(', ')}
-                                </p>
-                              )}
-                            </div>
-                            <span className="font-bold text-[#8B5E3C] font-outfit">₹{item.price * item.quantity}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Order Footer */}
-                      <div className="flex flex-col gap-3 pt-6 border-t border-[#E8E1D5]/50 bg-[#FAF5E9]/50 -mx-6 -mb-6 px-6 py-4 rounded-b-3xl">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-[#8B5E3C] uppercase tracking-widest">Payment Status</span>
-                          <span className={`text-xs font-bold px-2 py-1 rounded-md uppercase tracking-widest ${order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}`}>
-                            {order.paymentStatus || 'PENDING'}
-                          </span>
-                        </div>
-                        {order.razorpayPaymentId && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-[#8B5E3C] uppercase tracking-widest">Transaction ID</span>
-                            <span className="text-xs font-mono text-[#8B5E3C]">{order.razorpayPaymentId}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between pt-2 border-t border-[#E8E1D5]/50">
-                          <span className="text-sm font-bold text-[#1A4D2E] uppercase tracking-widest">Total Amount</span>
-                          <span className="text-2xl font-bold text-[#1A4D2E] font-outfit">₹{order.totalAmount}</span>
-                        </div>
-                      </div>
-
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <OrderHistory orders={orders} loadingOrders={loadingOrders} />
           </div>
-
-        </div>
-
-        {/* Mobile Logout Button */}
-        <div className="mt-8 mb-4 sm:hidden">
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-[#FDFBF7] text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300 font-bold rounded-2xl transition-all shadow-sm"
-          >
-            <LogOut className="w-5 h-5" /> Logout
-          </button>
+          
         </div>
       </div>
     </div>
