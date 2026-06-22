@@ -25,13 +25,25 @@ export default function Home() {
   const [showReviewModal, setShowReviewModal] = useState(false)
   const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, comment: "" })
   const [submittingReview, setSubmittingReview] = useState(false)
+
+  // Hydration-safe cache check
+  useEffect(() => {
+    if (localStorage.getItem('hasVideos') === 'false') {
+      setLoadingVideos(false)
+    }
+    if (localStorage.getItem('hasReviews') === 'false') {
+      setLoadingReviews(false)
+    }
+  }, [])
   
   // Dynamic Menu State
   const [bestsellers, setBestsellers] = useState([])
   const [combos, setCombos] = useState([])
+  const [loadingMenu, setLoadingMenu] = useState(true)
 
   // Global Settings State
   const [settings, setSettings] = useState(null)
+  const [loadingSettings, setLoadingSettings] = useState(true)
   const [currentCraftImageIndex, setCurrentCraftImageIndex] = useState(0)
 
   useEffect(() => {
@@ -41,6 +53,7 @@ export default function Home() {
         const data = res.data
         if (data.success) {
           setVideos(data.data)
+          if (typeof window !== 'undefined') localStorage.setItem('hasVideos', data.data.length > 0 ? 'true' : 'false')
         }
       } catch (err) {
         console.error("Failed to fetch videos", err)
@@ -55,6 +68,7 @@ export default function Home() {
         const data = res.data
         if (data.success) {
           setReviews(data.data)
+          if (typeof window !== 'undefined') localStorage.setItem('hasReviews', data.data.length > 0 ? 'true' : 'false')
         }
       } catch (err) {
         console.error("Failed to fetch reviews", err)
@@ -75,6 +89,8 @@ export default function Home() {
         }
       } catch (err) {
         console.error("Failed to fetch menu", err)
+      } finally {
+        setLoadingMenu(false)
       }
     }
 
@@ -92,6 +108,7 @@ export default function Home() {
         }
       })
       .catch(err => console.error('Failed to fetch settings:', err))
+      .finally(() => setLoadingSettings(false))
   }, [])
 
   useEffect(() => {
@@ -131,10 +148,10 @@ export default function Home() {
 
   return (
     <div className="bg-[#FAF8F5]">
-      <HeroSection settings={settings} />
-      <CraftSection settings={settings} isWheatFront={isWheatFront} currentCraftImageIndex={currentCraftImageIndex} />
-      <MenuCarousel combos={combos} bestsellers={bestsellers} />
-      <FeaturesSection />
+      <HeroSection settings={settings} isLoading={loadingSettings} />
+      <CraftSection settings={settings} isWheatFront={isWheatFront} currentCraftImageIndex={currentCraftImageIndex} isLoading={loadingSettings} />
+      <MenuCarousel combos={combos} bestsellers={bestsellers} isLoading={loadingMenu} />
+      <FeaturesSection isLoading={loadingSettings} />
       <VideosSection 
         videos={videos} 
         loadingVideos={loadingVideos} 
@@ -143,6 +160,7 @@ export default function Home() {
       />
       <ReviewsSection 
         reviews={reviews}
+        loadingReviews={loadingReviews}
         showReviewModal={showReviewModal}
         setShowReviewModal={setShowReviewModal}
         reviewForm={reviewForm}

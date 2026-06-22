@@ -1,7 +1,10 @@
 import { Star, X } from "lucide-react"
 
+import { Skeleton } from '@/components/ui/Skeleton'
+
 export default function ReviewsSection({ 
   reviews, 
+  loadingReviews,
   showReviewModal, 
   setShowReviewModal, 
   reviewForm, 
@@ -9,6 +12,56 @@ export default function ReviewsSection({
   handleReviewSubmit, 
   submittingReview 
 }) {
+  if (loadingReviews) {
+    return (
+      <section className="bg-white py-24 relative overflow-hidden border-t border-[#E6DCCF]">
+        <div className="container max-w-7xl relative z-10 mb-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-4 mb-3">
+                <span className="w-12 h-[2px] bg-[#16A34A]/20"></span>
+                <Skeleton className="h-10 w-64 rounded-lg" />
+              </div>
+              <Skeleton className="h-6 w-40 rounded-md mt-4" />
+            </div>
+            <Skeleton className="h-12 w-48 rounded-full" />
+          </div>
+        </div>
+        <div className="w-full relative">
+          <div className="flex overflow-hidden gap-6 px-4 md:px-8 lg:px-[max(2rem,calc((100vw-80rem)/2))] pb-12">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-[#FAF8F5] p-8 rounded-3xl min-w-[320px] max-w-[320px] md:min-w-[400px] md:max-w-[400px] shrink-0 border border-[#EAE5D9] shadow-sm">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(j => <Skeleton key={j} className="w-5 h-5 rounded-full" />)}
+                  </div>
+                  <Skeleton className="h-4 w-24 rounded" />
+                </div>
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4 mb-6" />
+                <div className="flex items-center gap-4 mt-auto">
+                  <Skeleton className="w-12 h-12 rounded-full shrink-0" />
+                  <div className="flex-1">
+                    <Skeleton className="h-5 w-32 mb-1 rounded" />
+                    <Skeleton className="h-3 w-20 rounded" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (reviews.length === 0) return null;
+  const averageRating = reviews.length > 0 
+    ? (reviews.reduce((a, r) => a + (r.rating || 5), 0) / reviews.length)
+    : 0;
+  const displayRating = averageRating.toFixed(1);
+  const roundedRating = Math.max(0, Math.min(5, Math.round(averageRating)));
+
   return (
     <>
       {/* ── CUSTOMER REVIEWS (PREMIUM CAROUSEL) ── */}
@@ -22,13 +75,16 @@ export default function ReviewsSection({
               </div>
               <div className="flex items-center gap-4 mt-4">
                 <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-[#16A34A] fill-[#16A34A]" />
+                  {[...Array(roundedRating)].map((_, i) => (
+                    <Star key={`full-${i}`} className="w-5 h-5 text-[#16A34A] fill-[#16A34A]" />
+                  ))}
+                  {[...Array(5 - roundedRating)].map((_, i) => (
+                    <Star key={`empty-${i}`} className="w-5 h-5 text-[#E6DCCF]" />
                   ))}
                 </div>
                 <p className="text-lg font-bold text-[#8B5A2B]" style={{ fontFamily: "var(--font-outfit)" }}>
-                  {reviews.length > 0 ? (reviews.reduce((a, r) => a + (r.rating || 5), 0) / reviews.length).toFixed(1) : "4.9"} / 5.0
-                  <span className="font-normal text-sm ml-2">({reviews.length > 0 ? reviews.length + 142 : "142"} Reviews)</span>
+                  {displayRating} / 5.0
+                  <span className="font-normal text-sm ml-2">({reviews.length} Reviews)</span>
                 </p>
               </div>
             </div>

@@ -1,9 +1,46 @@
 import Link from "next/link"
 import { ChefHat, ChevronRight } from "lucide-react"
+import { Skeleton } from "@/components/ui/Skeleton"
 
 const KITCHEN_IMG = "/images/dough_preparation.png"
 
-export default function CraftSection({ settings, isWheatFront, currentCraftImageIndex }) {
+export default function CraftSection({ settings, isWheatFront, currentCraftImageIndex, isLoading }) {
+  if (isLoading) {
+    return (
+      <section className="py-24 bg-white">
+        <div className="container max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="relative h-[400px] sm:h-[500px] w-full group">
+              <Skeleton className="absolute inset-0 rounded-[2rem] w-full h-full" />
+              <div className="absolute -bottom-8 -right-4 sm:-right-8 z-30 bg-white p-5 sm:p-6 rounded-3xl shadow-[0_10px_40px_rgba(22,163,74,0.15)] border border-[#EAE5D9]">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="w-16 h-16 rounded-full" />
+                  <div className="flex flex-col gap-2">
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 mb-4">
+                <Skeleton className="h-2 w-12" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+              <Skeleton className="h-16 w-3/4 rounded-lg" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-11/12" />
+              <Skeleton className="h-4 w-4/5" />
+              <Skeleton className="h-4 w-full mt-4" />
+              <Skeleton className="h-4 w-10/12" />
+              <Skeleton className="h-6 w-32 mt-6" />
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="py-24 bg-white">
       <div className="container max-w-6xl">

@@ -46,24 +46,43 @@ function LocateControl({ setPosition }) {
   const [locating, setLocating] = useState(false)
 
   const handleLocate = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.")
+      return
+    }
+
     setLocating(true)
-    map.locate().on("locationfound", function (e) {
-      setPosition(e.latlng)
-      map.flyTo(e.latlng, 15)
-      setLocating(false)
-    }).on("locationerror", function (e) {
-      alert("Could not access your location. Please check browser permissions.")
-      setLocating(false)
-    })
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latlng = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        }
+        setPosition(latlng)
+        map.flyTo(latlng, 16)
+        setLocating(false)
+      },
+      (error) => {
+        console.error("Browser Geolocation Error:", error)
+        let errorMsg = "Could not detect location."
+        if (error.code === 1) errorMsg = "Location permission denied. Please allow location access in your browser."
+        else if (error.code === 2) errorMsg = "Location information is unavailable right now."
+        else if (error.code === 3) errorMsg = "Location request timed out."
+        alert(errorMsg)
+        setLocating(false)
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    )
   }
 
   return (
     <div className="leaflet-top leaflet-right" style={{ pointerEvents: 'auto', zIndex: 1000 }}>
-      <div className="leaflet-control leaflet-bar" style={{ marginTop: '10px', marginRight: '10px', border: 'none', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }}>
+      <div className="leaflet-control leaflet-bar" style={{ marginTop: '20px', marginRight: '20px', border: 'none', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }}>
         <button 
-          onClick={(e) => { e.preventDefault(); handleLocate(); }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleLocate(); }}
           title="Use current location"
-          className="flex items-center justify-center w-10 h-10 bg-white hover:bg-gray-50 rounded-md transition-colors"
+          className="flex items-center justify-center w-10 h-10 bg-white hover:bg-gray-50 rounded-md transition-colors shadow-md"
           style={{ color: locating ? '#E8A359' : '#14452F' }}
         >
           <LocateFixed className={locating ? "animate-pulse" : ""} size={20} />

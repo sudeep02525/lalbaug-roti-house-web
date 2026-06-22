@@ -121,10 +121,46 @@ export default function CheckoutPage() {
     setLoc({ detected: true, lat: addr.lat, lng: addr.lng, distanceKm: d })
   }
 
-  const handleLocationSelect = (lat, lng) => {
+  const handleAddNewAddress = () => {
+    // Clear form data for a fresh address entry
+    setFormData({
+      name: user?.name || '',
+      mobile: user?.phone || '',
+      address: '',
+      landmark: '',
+      notes: ''
+    })
+    setLoc({ detected: false, lat: null, lng: null, distanceKm: 0 })
+    setLocationError('')
+    setShowNewAddressForm(true)
+  }
+
+  const handleCancelNewAddress = () => {
+    setShowNewAddressForm(false)
+    // Restore previous selection if it exists
+    if (selectedAddressIndex !== null && savedAddresses[selectedAddressIndex]) {
+      handleSelectSavedAddress(savedAddresses[selectedAddressIndex], selectedAddressIndex)
+    }
+  }
+
+  const handleLocationSelect = async (lat, lng) => {
     const d = calculateDistance(KITCHEN_LAT, KITCHEN_LNG, lat, lng)
     setLoc({ detected: true, lat, lng, distanceKm: d })
     setLocationError('')
+
+    // Use FREE Nominatim Reverse Geocoding API directly
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+      if (!response.ok) {
+        throw new Error('Nominatim reverse geocoding failed')
+      }
+      const data = await response.json()
+      if (data && data.display_name) {
+        setFormData(prev => ({ ...prev, address: data.display_name }))
+      }
+    } catch (err) {
+      console.error("Reverse Geocoding Error:", err)
+    }
   }
 
   const handleProceedToBillingFromForm = () => {
@@ -143,6 +179,8 @@ export default function CheckoutPage() {
     localStorage.setItem('savedAddresses', JSON.stringify(updatedAddrs))
     setSavedAddresses(updatedAddrs)
     setShowNewAddressForm(false)
+    // Select the newly added address
+    handleSelectSavedAddress(newAddr, updatedAddrs.length - 1)
     setStep(2)
   }
 
@@ -253,8 +291,9 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF5E9] pb-24 font-outfit selection:bg-[#8B5E3C] selection:text-white">
+    <div className="min-h-screen bg-[#FAF5E9] pb-12 font-outfit selection:bg-[#8B5E3C] selection:text-white">
       <style jsx global>{`
+        body { background-color: #FAF5E9 !important; }
         header, footer { display: none !important; }
         .font-playfair { font-family: var(--font-playfair); }
         .font-outfit { font-family: var(--font-outfit); }
@@ -307,7 +346,7 @@ export default function CheckoutPage() {
                 savedAddresses={savedAddresses}
                 selectedAddressIndex={selectedAddressIndex}
                 handleSelectSavedAddress={handleSelectSavedAddress}
-                setShowNewAddressForm={setShowNewAddressForm}
+                handleAddNewAddress={handleAddNewAddress}
                 handleProceedToBillingFromSaved={handleProceedToBillingFromSaved}
                 storeStatus={storeStatus}
               />
@@ -323,7 +362,7 @@ export default function CheckoutPage() {
                 deliveryCharge={deliveryCharge}
                 storeStatus={storeStatus}
                 savedAddresses={savedAddresses}
-                setShowNewAddressForm={setShowNewAddressForm}
+                handleCancelNewAddress={handleCancelNewAddress}
                 handleProceedToBillingFromForm={handleProceedToBillingFromForm}
               />
             )}

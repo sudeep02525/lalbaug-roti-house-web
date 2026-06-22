@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
-import { Loader2, ChevronLeft, LogOut, ShieldCheck } from 'lucide-react'
+import { Loader2, ChevronLeft, LogOut, ShieldCheck, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import axios from 'axios'
 
@@ -23,6 +23,7 @@ export default function ProfilePage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState(null)
+  const [deleteConfirmIndex, setDeleteConfirmIndex] = useState(null)
   const [addressForm, setAddressForm] = useState({ name: '', mobile: '', address: '', landmark: '', notes: '', lat: null, lng: null })
   const [locationError, setLocationError] = useState('')
 
@@ -112,14 +113,19 @@ export default function ProfilePage() {
   }
 
   const handleDeleteAddress = (index) => {
-    if (confirm("Are you sure you want to delete this address?")) {
+    setDeleteConfirmIndex(index)
+  }
+
+  const confirmDeleteAddress = () => {
+    if (deleteConfirmIndex !== null) {
       const newAddrs = [...savedAddresses]
-      const wasDefault = newAddrs[index].isDefault
-      newAddrs.splice(index, 1)
+      const wasDefault = newAddrs[deleteConfirmIndex].isDefault
+      newAddrs.splice(deleteConfirmIndex, 1)
       if (wasDefault && newAddrs.length > 0) {
         newAddrs[0].isDefault = true
       }
       saveAddressesToStorage(newAddrs)
+      setDeleteConfirmIndex(null)
     }
   }
 
@@ -240,6 +246,37 @@ export default function ProfilePage() {
           </div>
           
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirmIndex !== null && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#1A4D2E]/20 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-[#FDFBF7] w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-[#E8E1D5] animate-in zoom-in-95 duration-200">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                  <AlertTriangle className="w-8 h-8 text-red-600" />
+                </div>
+                <h3 className="text-xl font-bold text-[#1A4D2E] font-playfair mb-2">Delete Address</h3>
+                <p className="text-[#8B5E3C] mb-6 text-sm font-medium">
+                  Are you sure you want to delete this address? This action cannot be undone.
+                </p>
+                <div className="flex gap-3 w-full">
+                  <button 
+                    onClick={() => setDeleteConfirmIndex(null)}
+                    className="flex-1 px-4 py-3 rounded-xl border-2 border-[#E8E1D5] text-[#8B5E3C] font-bold hover:bg-[#E8E1D5]/30 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={confirmDeleteAddress}
+                    className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 shadow-md transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

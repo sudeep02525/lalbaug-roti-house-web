@@ -58,27 +58,36 @@ export default function OrderHistory({ orders, loadingOrders }) {
                     {new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })} at {new Date(order.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                   </p>
                 </div>
-                <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border ${getStatusColor(order.status)}`}>
-                  {order.status.replace('_', ' ')}
+                <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border ${getStatusColor(order.orderStatus || order.status)}`}>
+                  {(order.orderStatus || order.status)?.replace(/_/g, ' ') || 'UNKNOWN'}
                 </div>
               </div>
 
               {/* Order Items */}
               <div className="space-y-4 mb-6">
                 {order.items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-start gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded bg-[#FAF5E9] text-[#8B5E3C] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                        {item.quantity}x
-                      </div>
+                  <div key={idx} className="pb-4 border-b border-[#E8E1D5]/30 last:border-0 last:pb-0">
+                    <div className="flex justify-between items-start gap-4">
                       <div>
-                        <p className="font-bold text-[#1A4D2E]">{item.product.name}</p>
-                        {item.priceAtOrder && <p className="text-sm text-[#8B5E3C]">₹{item.priceAtOrder}</p>}
+                        <p className="font-bold text-[#1A4D2E] text-base">{item.name || item.product?.name || 'Unknown Product'}</p>
+                        <p className="text-sm text-[#8B5E3C] mt-0.5">
+                          Qty: {item.quantity} × ₹{item.price || item.priceAtOrder || 0}
+                        </p>
+                      </div>
+                      <div className="font-bold text-[#1A4D2E]">
+                        ₹{(((item.price || item.priceAtOrder) || 0) * (item.quantity || 1)).toFixed(2)}
                       </div>
                     </div>
-                    <div className="font-bold text-[#1A4D2E]">
-                      ₹{(item.priceAtOrder * item.quantity).toFixed(2)}
-                    </div>
+                    {item.addons && item.addons.length > 0 && (
+                      <div className="mt-2 pl-3 border-l-2 border-[#8B5E3C]/20 space-y-1">
+                        {item.addons.map((addon, aIdx) => (
+                          <div key={aIdx} className="flex justify-between text-sm text-[#1A4D2E]/80">
+                            <span>+ {addon.name} <span className="text-xs ml-1 opacity-70">(×{addon.quantity || 1})</span></span>
+                            <span>₹{((addon.price || 0) * (addon.quantity || 1)).toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -114,10 +123,34 @@ export default function OrderHistory({ orders, loadingOrders }) {
                 </div>
               )}
 
+              {/* Billing Summary */}
+              <div className="bg-[#FDFBF7] border border-[#E8E1D5] rounded-2xl p-4 mb-2 text-sm space-y-2.5">
+                <div className="flex justify-between text-[#1A4D2E]/80">
+                  <span>Item Total</span>
+                  <span>₹{(order.subtotal || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-[#1A4D2E]/80">
+                  <span>Delivery Charge</span>
+                  <span>₹{(order.deliveryCharge || 0).toFixed(2)}</span>
+                </div>
+                <div className="pt-2.5 mt-2.5 border-t border-[#E8E1D5]/50 flex justify-between items-center text-[#1A4D2E]/80">
+                  <span>Payment</span>
+                  <span className={`font-bold ${order.paymentStatus === 'PAID' ? 'text-green-700' : 'text-yellow-700'}`}>
+                    {order.paymentStatus || 'PENDING'}
+                  </span>
+                </div>
+                {order.razorpayPaymentId && (
+                  <div className="flex justify-between items-center text-xs mt-1 text-[#1A4D2E]/60">
+                    <span>Txn ID</span>
+                    <span className="font-mono">{order.razorpayPaymentId}</span>
+                  </div>
+                )}
+              </div>
+
               {/* Order Total */}
-              <div className="flex items-center justify-between pt-6 border-t border-[#E8E1D5]/50 mt-4">
+              <div className="flex items-center justify-between pt-4 border-t border-[#E8E1D5]/50 mt-4">
                 <p className="font-bold text-[#8B5E3C] uppercase tracking-widest text-sm">Total Paid</p>
-                <p className="text-2xl font-bold text-[#1A4D2E] font-playfair">₹{order.totalAmount.toFixed(2)}</p>
+                <p className="text-2xl font-normal text-[#1A4D2E]">₹{(order.totalAmount || 0).toFixed(2)}</p>
               </div>
 
             </div>

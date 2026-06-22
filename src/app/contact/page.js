@@ -8,10 +8,13 @@ import ContactInfo from '@/components/contact/ContactInfo'
 import ContactForm from '@/components/contact/ContactForm'
 import ContactMap from '@/components/contact/ContactMap'
 
+import { Skeleton } from "@/components/ui/Skeleton"
+
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [settings, setSettings] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -23,10 +26,39 @@ export default function ContactPage() {
         }
       } catch (err) {
         console.error("Failed to fetch settings", err)
+      } finally {
+        setLoading(false)
       }
     }
     fetchSettings()
   }, [])
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FAF5E9] pt-32 pb-24 relative overflow-hidden">
+        <div className="container mx-auto px-4 max-w-7xl relative z-10">
+          <div className="text-center mb-20 flex flex-col items-center">
+            <Skeleton className="h-10 w-48 mb-6 rounded-full" />
+            <Skeleton className="h-16 w-96 mb-6 rounded-lg" />
+            <Skeleton className="h-6 w-[600px]" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+            <div className="lg:col-span-2 space-y-6">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)}
+            </div>
+            <div className="lg:col-span-3">
+              <Skeleton className="h-[500px] w-full rounded-3xl" />
+            </div>
+          </div>
+          
+          {/* Skeleton for Contact Map */}
+          <div className="mt-16 bg-white/50 p-3 lg:p-4 rounded-[2rem] border border-[#E8E1D5]/50">
+            <Skeleton className="w-full h-[450px] rounded-[1.5rem]" />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value })
 

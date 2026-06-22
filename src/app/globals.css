@@ -205,12 +205,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
+/* Smooth scrolling removed to fix scroll restoration jumping */
 
 /* Typography globals */
 h1, h2 {
   font-family: var(--font-playfair), serif;
+}
+
+@layer utilities {
+  .animate-shimmer {
+    animation: shimmer 1.5s infinite linear;
+    background-image: linear-gradient(to right, #E6E2D8 0%, #F5F1E8 20%, #E6E2D8 40%, #E6E2D8 100%);
+    background-size: 1000px 100%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
 }

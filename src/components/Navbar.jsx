@@ -6,6 +6,8 @@ import { useState, useEffect, useRef } from "react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
+import { Skeleton } from "@/components/ui/Skeleton";
+
 export function Navbar() {
   const pathname = usePathname();
   const { totalItems, storeStatus } = useCart();
@@ -31,6 +33,7 @@ export function Navbar() {
 
   useEffect(() => {
     setMounted(true);
+    setScrolled(window.scrollY > 20);
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
@@ -68,7 +71,7 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 w-full transition-[background-color,box-shadow] duration-300 bg-white shadow-[0_4px_20px_rgb(0,0,0,0.08)] ${scrolled ? "" : "lg:bg-transparent lg:shadow-none"} ${pathname === '/profile' ? 'lg:hidden' : ''}`}
+      className={`fixed top-0 left-0 right-0 z-50 w-full ${mounted ? "transition-[background-color,box-shadow] duration-300" : ""} bg-white shadow-[0_4px_20px_rgb(0,0,0,0.08)] ${scrolled ? "" : "lg:bg-transparent lg:shadow-none"} ${pathname === '/profile' ? 'lg:hidden' : ''}`}
     >
       {/* Global Store Closed Banner */}
       {mounted && storeStatus && !storeStatus.isOpen && (
@@ -78,48 +81,67 @@ export function Navbar() {
         </div>
       )}
       <div
-        className={`container transition-[padding] duration-300 ease-out py-0 ${scrolled ? "" : "lg:py-4"}`}
+        className={`container ${mounted ? "transition-[padding] duration-300 ease-out" : ""} py-0 ${scrolled ? "" : "lg:py-4"}`}
       >
         <div
-          className={`flex items-center justify-between transition-[background-color,border-color,box-shadow,padding,border-radius] duration-300 ease-out h-20 px-4 border border-transparent bg-transparent shadow-none ${scrolled ? "lg:px-0" : "lg:px-8 lg:bg-white/95 lg:shadow-[0_8px_30px_rgba(22,163,74,0.1)] lg:rounded-2xl lg:border-[#16A34A]/20"}`}
+          className={`flex items-center justify-between ${mounted ? "transition-[background-color,border-color,box-shadow,padding,border-radius] duration-300 ease-out" : ""} h-20 px-4 border border-transparent bg-transparent shadow-none ${scrolled ? "lg:px-0" : "lg:px-8 lg:bg-white/95 lg:shadow-[0_8px_30px_rgba(22,163,74,0.1)] lg:rounded-2xl lg:border-[#16A34A]/20"}`}
         >
           {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 shrink-0 lg:ml-12 xl:ml-16"
-          >
-            <img
-              src="/logo.jpeg"
-              alt="Lalbaug Roti House"
-              className="h-14 md:h-16 w-auto object-contain rounded-2xl shadow-sm border border-[#EAE5D9] hover:scale-105 transition-transform duration-500"
-            />
-          </Link>
+          {!mounted ? (
+            <div className="flex items-center gap-2 shrink-0 lg:ml-12 xl:ml-16">
+              <Skeleton className="w-14 h-14 md:w-16 md:h-16 rounded-2xl" />
+            </div>
+          ) : (
+            <Link
+              href="/"
+              className="flex items-center gap-2 shrink-0 lg:ml-12 xl:ml-16"
+            >
+              <img
+                src="/logo.jpeg"
+                alt="Lalbaug Roti House"
+                className="h-14 md:h-16 w-auto object-contain rounded-2xl shadow-sm border border-[#EAE5D9] hover:scale-105 transition-transform duration-500"
+              />
+            </Link>
+          )}
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-2">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
-                    isActive
-                      ? "text-[#16A34A] bg-[#16A34A]/10"
-                      : "text-[#114D3C] hover:bg-[#F2ECE4] hover:text-[#16A34A]"
-                  }`}
-                  style={{ fontFamily: "var(--font-outfit)" }}
-                >
-                  {link.name}
-                </Link>
-              );
-            })}
-          </nav>
+          {!mounted ? (
+            <div className="hidden lg:flex items-center gap-8">
+              {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-4 w-16 rounded" />)}
+            </div>
+          ) : (
+            <nav className="hidden lg:flex items-center gap-2">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
+                      isActive
+                        ? "text-[#16A34A] bg-[#16A34A]/10"
+                        : "text-[#114D3C] hover:bg-[#F2ECE4] hover:text-[#16A34A]"
+                    }`}
+                    style={{ fontFamily: "var(--font-outfit)" }}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
 
           {/* Right side */}
-          <div className="flex items-center gap-4 relative">
-            
-            {/* Cart */}
+          {!mounted ? (
+            <div className="flex items-center gap-4 lg:mr-12 xl:mr-16">
+              <Skeleton className="w-12 h-12 rounded-full hidden lg:flex" />
+              <Skeleton className="w-[90px] h-[38px] rounded-full hidden lg:flex" />
+              <Skeleton className="w-12 h-12 rounded-full lg:hidden" />
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 relative">
+              
+              {/* Cart */}
             <Link
               href="/cart"
               className="relative hidden lg:flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-sm text-[#114D3C] border border-[#EAE5D9] hover:border-[#16A34A] hover:text-[#16A34A] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
@@ -136,58 +158,56 @@ export function Navbar() {
             </Link>
 
             {/* User Profile / Login (Desktop) */}
-            {mounted && (
-              <div className="hidden lg:block relative" ref={dropdownRef}>
-                {user ? (
-                  <div className="relative">
-                    <button 
-                      onClick={() => setDropdownOpen(!dropdownOpen)}
-                      className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#EAE5D9] hover:border-[#16A34A] transition-colors bg-white shadow-sm"
-                    >
-                      <div className="w-7 h-7 rounded-full bg-[#16A34A] text-white flex items-center justify-center font-bold text-xs uppercase">
-                        {user.name.charAt(0)}
-                      </div>
-                      <span className="text-sm font-bold text-[#114D3C] max-w-[100px] truncate" style={{ fontFamily: "var(--font-outfit)" }}>
-                        {user.name.split(' ')[0]}
-                      </span>
-                    </button>
-
-                    {/* Dropdown Menu */}
-                    {dropdownOpen && (
-                      <div className="absolute right-0 mt-3 w-48 bg-white border border-[#EAE5D9] rounded-2xl shadow-xl py-2 z-50">
-                        <div className="px-4 py-3 border-b border-[#EAE5D9] mb-2">
-                          <p className="text-sm font-bold text-[#114D3C] truncate">{user.name}</p>
-                          <p className="text-xs text-[#73706A] truncate">{user.phone}</p>
-                        </div>
-                        <Link 
-                          href="/profile"
-                          onClick={() => setDropdownOpen(false)}
-                          className="w-full text-left px-4 py-2 text-sm text-[#114D3C] hover:bg-[#FAF8F5] flex items-center gap-2 transition-colors font-bold"
-                          style={{ fontFamily: "var(--font-outfit)" }}
-                        >
-                          <User className="w-4 h-4" /> My Profile
-                        </Link>
-                        <button 
-                          onClick={handleLogout}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors font-bold mt-1"
-                          style={{ fontFamily: "var(--font-outfit)" }}
-                        >
-                          <LogOut className="w-4 h-4" /> Logout
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="flex items-center gap-2 text-[#114D3C] text-sm font-bold px-4 py-2 rounded-full hover:bg-[#FAF8F5] border border-transparent hover:border-[#EAE5D9] transition-all"
-                    style={{ fontFamily: "var(--font-outfit)" }}
+            <div className="hidden lg:block relative min-w-[90px] h-[38px]" ref={dropdownRef}>
+              {user ? (
+                <div className="relative">
+                  <button 
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#EAE5D9] hover:border-[#16A34A] transition-colors bg-white shadow-sm h-[38px]"
                   >
-                    <User className="w-4 h-4" /> Login
-                  </Link>
-                )}
-              </div>
-            )}
+                    <div className="w-6 h-6 rounded-full bg-[#16A34A] text-white flex items-center justify-center font-bold text-xs uppercase">
+                      {user.name.charAt(0)}
+                    </div>
+                    <span className="text-sm font-bold text-[#114D3C] max-w-[100px] truncate" style={{ fontFamily: "var(--font-outfit)" }}>
+                      {user.name.split(' ')[0]}
+                    </span>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {dropdownOpen && (
+                    <div className="absolute right-0 mt-3 w-48 bg-white border border-[#EAE5D9] rounded-2xl shadow-xl py-2 z-50">
+                      <div className="px-4 py-3 border-b border-[#EAE5D9] mb-2">
+                        <p className="text-sm font-bold text-[#114D3C] truncate">{user.name}</p>
+                        <p className="text-xs text-[#73706A] truncate">{user.phone}</p>
+                      </div>
+                      <Link 
+                        href="/profile"
+                        onClick={() => setDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-[#114D3C] hover:bg-[#FAF8F5] flex items-center gap-2 transition-colors font-bold"
+                        style={{ fontFamily: "var(--font-outfit)" }}
+                      >
+                        <User className="w-4 h-4" /> My Profile
+                      </Link>
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors font-bold mt-1"
+                        style={{ fontFamily: "var(--font-outfit)" }}
+                      >
+                        <LogOut className="w-4 h-4" /> Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex items-center justify-center gap-2 text-[#114D3C] text-sm font-bold px-4 h-[38px] rounded-full hover:bg-[#FAF8F5] border border-transparent hover:border-[#EAE5D9] transition-all w-[90px]"
+                  style={{ fontFamily: "var(--font-outfit)" }}
+                >
+                  <User className="w-4 h-4" /> Login
+                </Link>
+              )}
+            </div>
 
             {/* Hamburger - mobile */}
             <button
@@ -198,6 +218,7 @@ export function Navbar() {
               <Menu className="w-5 h-5" />
             </button>
           </div>
+          )}
         </div>
       </div>
 

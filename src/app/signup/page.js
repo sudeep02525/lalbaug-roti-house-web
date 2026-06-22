@@ -127,6 +127,7 @@ function SignupContent() {
         footer {
           display: none !important;
         }
+        main { padding-bottom: 0 !important; }
       `}</style>
       
       <SignupHero />

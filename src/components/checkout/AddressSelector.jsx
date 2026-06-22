@@ -4,7 +4,7 @@ export default function AddressSelector({
   savedAddresses,
   selectedAddressIndex,
   handleSelectSavedAddress,
-  setShowNewAddressForm,
+  handleAddNewAddress,
   handleProceedToBillingFromSaved,
   storeStatus
 }) {
@@ -17,7 +17,7 @@ export default function AddressSelector({
         </div>
         {savedAddresses.length < 5 && (
           <button 
-            onClick={() => setShowNewAddressForm(true)}
+            onClick={handleAddNewAddress}
             className="hidden sm:flex items-center gap-2 px-6 py-3 bg-[#FDFBF7] text-[#8B5E3C] font-bold rounded-2xl hover:bg-[#FAF5E9] border border-[#E8E1D5] transition-all"
           >
             <Plus className="w-5 h-5" /> Add New Address
@@ -75,7 +75,7 @@ export default function AddressSelector({
 
       {savedAddresses.length < 5 && (
         <button 
-          onClick={() => setShowNewAddressForm(true)}
+          onClick={handleAddNewAddress}
           className="sm:hidden w-full mt-6 flex items-center justify-center gap-2 px-6 py-4 bg-[#FDFBF7] text-[#8B5E3C] font-bold rounded-2xl hover:bg-[#FAF5E9] border border-[#E8E1D5] transition-all"
         >
           <Plus className="w-5 h-5" /> Add New Address

@@ -3,9 +3,12 @@ import Link from 'next/link'
 import { getImageUrl } from '@/components/ProductCard'
 
 export default function CartItems({ items, calculateItemTotal, updateQuantity, removeFromCart }) {
+  // Filter out items added from the cross-sell section so they don't appear in the main list
+  const displayItems = items.filter(item => !item.product.isCrossSell);
+
   return (
-    <div className="lg:col-span-7 space-y-4">
-      {items.map((item) => {
+    <div className="space-y-4 w-full">
+      {displayItems.map((item) => {
         const itemTotal = calculateItemTotal(item)
         
         // Base price calculation for UI comparison
@@ -85,13 +88,6 @@ export default function CartItems({ items, calculateItemTotal, updateQuantity, r
         )
       })}
 
-      <Link
-        href="/menu"
-        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#16A34A] hover:text-[#114D3C] transition-colors tracking-widest uppercase p-2"
-        style={{ fontFamily: "var(--font-outfit)" }}
-      >
-        <Plus className="w-4 h-4" /> Add more items
-      </Link>
     </div>
   )
 }

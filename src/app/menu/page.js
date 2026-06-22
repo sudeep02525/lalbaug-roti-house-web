@@ -8,6 +8,8 @@ import axios from 'axios'
 
 import MenuCategorySection from '@/components/MenuCategorySection'
 import ProductCard from '@/components/ProductCard'
+import ProductCardSkeleton from '@/components/ProductCardSkeleton'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 function MenuContent() {
   const searchParams = useSearchParams()
@@ -60,9 +62,52 @@ function MenuContent() {
     <div className="bg-[#FAF8F5] min-h-screen pt-28">
 
       {loading ? (
-        <div className="container max-w-7xl py-24 text-center">
-          <div className="w-12 h-12 border-4 border-[#16A34A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#114D3C] font-bold text-xl font-outfit">Loading Fresh Menu...</p>
+        <div className="container max-w-7xl">
+          {/* Skeleton Top Header */}
+          <div className="bg-white border-b border-[#EAE5D9] pt-8 pb-6 mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-6">
+              <div>
+                <Skeleton className="h-4 w-32 mb-2" />
+                <Skeleton className="h-10 w-64 lg:w-96" />
+              </div>
+              <Skeleton className="h-12 w-full lg:w-96 rounded-2xl" />
+            </div>
+          </div>
+          
+          {/* Skeleton Categories */}
+          <div className="flex gap-3 overflow-x-hidden pb-4 mb-8">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-10 w-24 rounded-full shrink-0" />
+            ))}
+          </div>
+
+          {/* Skeleton Sections matching MenuCategorySection */}
+          {[...Array(3)].map((_, sectionIdx) => (
+            <div key={sectionIdx} className="mb-16">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-8 border-b border-[#EAE5D9] pb-4">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="w-10 h-10 rounded-full" />
+                  <Skeleton className="h-8 w-48 rounded-lg" />
+                </div>
+                
+                {/* Arrows */}
+                <div className="hidden sm:flex items-center gap-2">
+                  <Skeleton className="w-10 h-10 rounded-full" />
+                  <Skeleton className="w-10 h-10 rounded-full" />
+                </div>
+              </div>
+
+              {/* Horizontal Scroll List */}
+              <div className="flex items-start overflow-hidden gap-4 sm:gap-6 pb-8 pt-4 -mx-4 px-4 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="shrink-0 w-[85vw] sm:w-[calc(50vw-48px)] md:w-[calc(33.33vw-48px)] lg:w-[calc((100%-72px)/4)]">
+                    <ProductCardSkeleton />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <>
@@ -142,9 +187,37 @@ function MenuContent() {
 export default function MenuPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#114D3C] border-t-[#C19B6C] rounded-full animate-spin mb-4" />
-        <p className="text-[#114D3C] font-bold tracking-widest uppercase" style={{ fontFamily: "var(--font-outfit)" }}>Loading Menu...</p>
+      <div className="bg-[#FAF8F5] min-h-screen pt-28">
+        <div className="container max-w-7xl">
+          {/* Skeleton Top Header */}
+          <div className="bg-white border-b border-[#EAE5D9] pt-8 pb-6 mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-6">
+              <div>
+                <div className="h-4 w-32 animate-shimmer rounded mb-2"></div>
+                <div className="h-10 w-64 lg:w-96 animate-shimmer rounded"></div>
+              </div>
+              <div className="h-12 w-full lg:w-96 animate-shimmer rounded-2xl"></div>
+            </div>
+          </div>
+          
+          {/* Skeleton Categories */}
+          <div className="flex gap-3 overflow-x-hidden pb-4 mb-8">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-10 w-24 animate-shimmer rounded-full shrink-0"></div>
+            ))}
+          </div>
+
+          {/* Skeleton Grid */}
+          <div className="mb-6 flex items-center gap-2">
+            <div className="h-8 w-8 animate-shimmer rounded-full"></div>
+            <div className="h-8 w-32 animate-shimmer rounded-md"></div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 pb-12">
+            {[...Array(24)].map((_, i) => (
+              <div key={i} className="h-72 w-full animate-shimmer rounded-2xl"></div>
+            ))}
+          </div>
+        </div>
       </div>
     }>
       <MenuContent />

@@ -1,6 +1,47 @@
 import { Award, ShieldCheck, MapPin, ShoppingBag, ChefHat, Truck } from "lucide-react"
+import { Skeleton } from "@/components/ui/Skeleton"
 
-export default function FeaturesSection() {
+export default function FeaturesSection({ isLoading }) {
+  if (isLoading) {
+    return (
+      <>
+        <section className="bg-[#FAF8F5] py-20 border-y border-[#E6DCCF]">
+          <div className="container max-w-6xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-[#E6DCCF] flex flex-col items-center">
+                  <Skeleton className="w-16 h-16 rounded-full mb-6" />
+                  <Skeleton className="h-6 w-32 mb-3" />
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-4/5" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section className="py-24 bg-white relative overflow-hidden">
+          <div className="container max-w-6xl relative z-10">
+            <div className="text-center mb-16 flex flex-col items-center">
+              <Skeleton className="h-10 w-64 mb-4 rounded-lg" />
+              <Skeleton className="h-6 w-96 rounded-md" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center relative">
+              <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-[#EAE5D9]/50 z-0 opacity-30"></div>
+              {[1, 2, 3].map(i => (
+                <div key={i} className="relative z-10 flex flex-col items-center">
+                  <Skeleton className="w-24 h-24 rounded-full mb-6" />
+                  <Skeleton className="h-6 w-40 mb-3" />
+                  <Skeleton className="h-4 w-5/6 mt-3 mb-2" />
+                  <Skeleton className="h-4 w-4/6" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </>
+    )
+  }
+
   return (
     <>
       {/* ── INGREDIENTS & QUALITY ── */}

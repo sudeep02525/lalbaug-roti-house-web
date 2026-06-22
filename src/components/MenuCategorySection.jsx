@@ -1,22 +1,48 @@
-import { useRef } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Leaf, ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductCard from '@/components/ProductCard'
+import useEmblaCarousel from 'embla-carousel-react'
+import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures'
+import { motion } from 'framer-motion'
 
 export default function MenuCategorySection({ category, items }) {
-  const scrollRef = useRef(null)
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    align: 'start',
+    containScroll: 'trimSnaps',
+    skipSnaps: false,
+    inViewThreshold: 0.7
+  }, [WheelGesturesPlugin({
+    forceWheelAxis: 'x',
+  })])
   
-  const scrollCategory = (dir) => {
-    if (scrollRef.current) {
-      const card = scrollRef.current.querySelector('.shrink-0');
-      if (card) {
-        const gap = window.innerWidth < 640 ? 16 : 24;
-        const scrollAmount = card.offsetWidth + gap;
-        scrollRef.current.scrollBy({ left: dir === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' })
-      }
-    }
-  }
+  const [prevBtnEnabled, setPrevBtnEnabled] = useState(false)
+  const [nextBtnEnabled, setNextBtnEnabled] = useState(false)
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev()
+  }, [emblaApi])
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext()
+  }, [emblaApi])
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return
+    setPrevBtnEnabled(emblaApi.canScrollPrev())
+    setNextBtnEnabled(emblaApi.canScrollNext())
+  }, [emblaApi])
+
+  useEffect(() => {
+    if (!emblaApi) return
+    onSelect()
+    emblaApi.on('reInit', onSelect)
+    emblaApi.on('select', onSelect)
+  }, [emblaApi, onSelect])
 
   if (items.length === 0) return null;
+  
+  const isScrollable = prevBtnEnabled || nextBtnEnabled;
+
   return (
     <div id={`category-${category.replace(/\s+/g, '-').toLowerCase()}`} className="mb-16 scroll-mt-32 relative">
       {/* Header */}
@@ -29,28 +55,42 @@ export default function MenuCategorySection({ category, items }) {
         </div>
         
         {/* Arrows */}
-        <div className="hidden sm:flex items-center gap-2">
-          <button onClick={() => scrollCategory('left')} className="w-10 h-10 rounded-full bg-white border border-[#EAE5D9] flex items-center justify-center text-[#114D3C] hover:bg-[#FAF8F5] transition-colors shadow-sm">
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button onClick={() => scrollCategory('right')} className="w-10 h-10 rounded-full bg-white border border-[#EAE5D9] flex items-center justify-center text-[#114D3C] hover:bg-[#FAF8F5] transition-colors shadow-sm">
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
+        {isScrollable && (
+          <div className="hidden sm:flex items-center gap-2">
+            <button 
+              onClick={scrollPrev} 
+              disabled={!prevBtnEnabled}
+              className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-all ${prevBtnEnabled ? 'bg-white border border-[#EAE5D9] text-[#114D3C] hover:bg-[#FAF8F5] active:scale-95' : 'bg-gray-50 border border-gray-100 text-gray-300 cursor-not-allowed'}`}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={scrollNext} 
+              disabled={!nextBtnEnabled}
+              className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-all ${nextBtnEnabled ? 'bg-white border border-[#EAE5D9] text-[#114D3C] hover:bg-[#FAF8F5] active:scale-95' : 'bg-gray-50 border border-gray-100 text-gray-300 cursor-not-allowed'}`}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Horizontal Scroll List (Perfectly fits 4 items on desktop) */}
-      <div 
-        ref={scrollRef}
-        className="flex items-start overflow-x-auto snap-x snap-mandatory gap-4 sm:gap-6 pb-8 pt-4 -mx-4 px-4 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0 hide-scrollbar scroll-smooth" 
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        <style jsx>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
-        {items.map(item => (
-          <div key={item.id} className="shrink-0 snap-start scroll-ml-4 sm:scroll-ml-8 lg:scroll-ml-0 w-[85vw] sm:w-[calc(50vw-48px)] md:w-[calc(33vw-48px)] lg:w-[calc((100%-72px)/4)]">
-            <ProductCard item={item} />
-          </div>
-        ))}
+      {/* Embla Carousel */}
+      <div className="overflow-hidden -mx-4 px-4 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0 py-4" ref={emblaRef}>
+        <div className="flex -ml-4 sm:-ml-6 items-start">
+          {items.map((item, index) => (
+            <motion.div 
+              key={item.id} 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.5) }}
+              className="flex-[0_0_calc(85vw+16px)] sm:flex-[0_0_50%] md:flex-[0_0_33.333333%] lg:flex-[0_0_25%] min-w-0 pl-4 sm:pl-6"
+            >
+              <ProductCard item={item} />
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   )

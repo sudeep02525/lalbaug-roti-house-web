@@ -128,6 +128,7 @@ function LoginContent() {
     <div className="h-screen flex bg-white relative overflow-hidden">
       <style jsx global>{`
         header, footer { display: none !important; }
+        main { padding-bottom: 0 !important; }
       `}</style>
       
       <LoginHero />

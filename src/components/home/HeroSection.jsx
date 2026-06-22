@@ -1,7 +1,43 @@
 import Link from "next/link"
 import { Sparkles, ShoppingBag, ChevronRight, Leaf, ShieldCheck, Clock, Truck } from "lucide-react"
+import { Skeleton } from "@/components/ui/Skeleton"
 
-export default function HeroSection({ settings }) {
+export default function HeroSection({ settings, isLoading }) {
+  if (isLoading) {
+    return (
+      <section className="bg-gradient-to-b from-[#FAF8F5] to-[#F2ECE4] overflow-hidden relative border-b border-[#E6DCCF]">
+        <div className="container relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center min-h-screen pt-32 pb-12 lg:pt-40 lg:pb-16">
+            <div className="space-y-4 pl-0 lg:pl-16 xl:pl-20">
+              <Skeleton className="h-8 w-40 rounded-full mb-4" />
+              <Skeleton className="h-[4rem] lg:h-[6rem] w-[80%] rounded-2xl mb-2" />
+              <Skeleton className="h-[4rem] lg:h-[6rem] w-[60%] rounded-2xl mb-6" />
+              <Skeleton className="h-6 w-full max-w-lg mb-2" />
+              <Skeleton className="h-6 w-3/4 max-w-lg mb-8" />
+              
+              <div className="grid grid-cols-4 gap-4 max-w-sm pt-2 mb-8">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="flex flex-col items-center gap-2">
+                    <Skeleton className="w-12 h-12 lg:w-14 lg:h-14 rounded-full" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex flex-col sm:flex-row items-center gap-4 pt-5">
+                <Skeleton className="h-14 w-48 rounded-full" />
+                <Skeleton className="h-6 w-32" />
+              </div>
+            </div>
+            <div className="hidden lg:block relative h-full min-h-[500px]">
+              <Skeleton className="absolute inset-0 w-full h-full rounded-[3rem]" />
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   const trustBadges = [
     { icon: Leaf, label: "100% Pure Veg" },
     { icon: ShieldCheck, label: "Hygienic Kitchen" },

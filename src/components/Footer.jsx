@@ -19,9 +19,12 @@ const InstagramIcon = ({ className }) => (
   </svg>
 )
 
+import { Skeleton } from "@/components/ui/Skeleton"
+
 export function Footer() {
   const pathname = usePathname();
   const [settings, setSettings] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -33,12 +36,51 @@ export function Footer() {
         }
       } catch (err) {
         console.error("Failed to fetch settings", err)
+      } finally {
+        setLoading(false)
       }
     }
     fetchSettings()
   }, [])
 
   if (pathname === '/order-success') return null;
+
+  if (loading) {
+    return (
+      <footer className="bg-[#0B382B] border-t-4 border-[#C19B6C] relative overflow-hidden">
+        <div className="container py-20 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+            <div className="lg:col-span-1 space-y-6">
+              <div className="h-16 w-32 rounded-2xl bg-white/10 animate-pulse" />
+              <div className="h-4 w-full bg-white/10 animate-pulse rounded" />
+              <div className="h-4 w-4/5 bg-white/10 animate-pulse rounded" />
+              <div className="flex gap-4">
+                <div className="h-11 w-11 rounded-full bg-white/10 animate-pulse" />
+                <div className="h-11 w-11 rounded-full bg-white/10 animate-pulse" />
+                <div className="h-11 w-11 rounded-full bg-white/10 animate-pulse" />
+              </div>
+            </div>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="space-y-6">
+                <div className="h-4 w-24 bg-white/10 animate-pulse rounded" />
+                <div className="space-y-4">
+                  {[1, 2, 3, 4].map((j) => (
+                    <div key={j} className="h-4 w-32 bg-white/10 animate-pulse rounded" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="border-t border-white/10 bg-[#082A20]">
+          <div className="container py-6 flex justify-between">
+            <div className="h-4 w-48 bg-white/10 animate-pulse rounded" />
+            <div className="h-4 w-64 bg-white/10 animate-pulse rounded hidden md:block" />
+          </div>
+        </div>
+      </footer>
+    )
+  }
 
   return (
     <footer className="bg-[#0B382B] text-white/80 border-t-4 border-[#C19B6C] relative overflow-hidden">

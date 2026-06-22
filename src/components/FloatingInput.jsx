@@ -10,7 +10,7 @@ export default function FloatingInput({ label, value, onChange, placeholder, typ
         placeholder=" "
       />
       <label 
-        className="absolute text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C]" 
+        className="absolute pointer-events-none text-[#8B5E3C]/60 font-medium duration-300 transform -translate-y-3 scale-75 top-5 z-10 origin-[0] left-5 truncate max-w-[calc(133%-2.5rem)] peer-placeholder-shown:max-w-[calc(100%-2.5rem)] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:max-w-[calc(133%-2.5rem)] peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#8B5E3C]" 
         style={{ fontFamily: "var(--font-outfit)" }}
       >
         {label} {required && '*'}

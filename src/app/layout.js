@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import FloatingCart from "@/components/FloatingCart";
 import LocalBusinessSchema from "@/components/seo/LocalBusinessSchema";
 
 const inter = Inter({
@@ -73,16 +74,17 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} ${outfit.variable} ${greatVibes.variable} font-sans antialiased min-h-screen flex flex-col bg-[var(--background)]`}>
         <LocalBusinessSchema />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <AuthProvider>
             <CartProvider>
               <Navbar />
-              <main className="flex-1">
+              <main className="flex-1 pb-24">
                 {children}
               </main>
+              <FloatingCart />
               <Footer />
             </CartProvider>
           </AuthProvider>
