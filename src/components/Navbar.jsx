@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { ShoppingCart, Menu, X, ShoppingBag, User, LogOut, AlertCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 export function Navbar() {
   const pathname = usePathname();
